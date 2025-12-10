@@ -1,18 +1,19 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Briefcase, CheckCircle, ShieldCheck } from 'lucide-react';
+import { MapPin, Briefcase, CheckCircle, ShieldCheck, Star } from 'lucide-react';
 
 const secretaries = [
   {
     name: "Grace Lam",
     company: "Corpsec Services Sdn Bhd",
     clients: 250,
-    location: "Kuala Lumpur, Malaysia",
+    rating: 4.9,
+    location: "Kuala Lumpur",
     experience: "7+ years",
     price: "RM 1,600",
     features: [
       "24/7 access to statutory company records",
-      "Enjoy one month free Company Secretary Subscription",
+      "One month free Company Secretary Subscription",
       "Complimentary Corporate Bank account opening"
     ]
   },
@@ -20,101 +21,148 @@ const secretaries = [
     name: "Jessica Lane",
     company: "Napoli Secretarial Sdn Bhd",
     clients: 371,
-    location: "Cyberjaya, Malaysia",
+    rating: 4.8,
+    location: "Cyberjaya",
     experience: "4+ years",
     price: "RM 1,200",
     features: [
-      "Documents are prioritised for submission",
-      "Registered office address use",
-      "Get automated reminders for all your compliance"
+      "Priority document submission",
+      "Registered office address included",
+      "Automated compliance reminders"
     ]
   },
   {
     name: "Siti Hisham",
     company: "Hisham Corps Sdn Bhd",
     clients: 89,
-    location: "Petaling Jaya, Selangor",
+    rating: 5.0,
+    location: "Petaling Jaya",
     experience: "11+ years",
     price: "RM 1,200",
     features: [
-      "Receive your first Share certificate at no cost",
-      "Always on chat support for Compliance",
-      "Have your company documents delivered securely"
+      "Free first Share certificate",
+      "Dedicated compliance chat support",
+      "Secure document delivery"
     ]
   },
   {
     name: "Ahmad Usman",
     company: "Big Secretarial Sdn Bhd",
     clients: 390,
-    location: "Petaling Jaya, Selangor",
+    rating: 4.9,
+    location: "Petaling Jaya",
     experience: "21+ years",
-    price: "RM 1,200",
+    price: "RM 1,450",
     features: [
-      "Enjoy one month free Company Secretary Subscription",
-      "Complimentary Corporate Bank account opening",
-      "24/7 access to statutory company records"
+      "Senior secretarial consultation",
+      "Express incorporation service",
+      "Annual return filing included"
     ]
   }
 ];
 
 export default function Secretaries() {
   return (
-    <section className="section" style={{ background: '#f8fafc' }}>
+    <section className="section" style={{ background: '#f8fafc', padding: '6rem 0' }}>
       <div className="container">
-        <h2 className="section-title">Register Your Company with Malaysia’s Leading Company Secretaries</h2>
-        <p className="section-subtitle">Certified Experts. Appoint a Company Secretary. Your secretary handles all details and documents to ensure a smooth and compliant SSM registration.</p>
+        <div style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto 4rem auto' }}>
+          <div style={{ 
+            display: 'inline-flex', 
+            alignItems: 'center', 
+            gap: '0.5rem', 
+            padding: '0.5rem 1rem', 
+            background: '#eff6ff', 
+            color: '#2563eb', 
+            borderRadius: '999px', 
+            fontSize: '0.875rem', 
+            fontWeight: '600',
+            marginBottom: '1.5rem'
+          }}>
+            <ShieldCheck size={16} /> Verified Partners
+          </div>
+          <h2 className="section-title" style={{ fontSize: '2.5rem', marginBottom: '1.5rem', color: '#0f172a' }}>
+            Malaysia’s Top Company Secretaries
+          </h2>
+          <p className="section-subtitle" style={{ fontSize: '1.125rem', color: '#64748b' }}>
+            We partner with certified experts to handle your compliance. Choose a secretary that fits your business needs and get started today.
+          </p>
+        </div>
         
-        <div className="grid grid-2">
+        <div className="grid grid-2" style={{ gap: '2rem' }}>
           {secretaries.map((sec, index) => (
-            <div key={index} className="card secretary-card">
-              <div className="secretary-header">
-                <div className="secretary-avatar"></div>
+            <div key={index} className="card secretary-card" style={{ 
+              background: 'white', 
+              borderRadius: '16px', 
+              border: '1px solid #e2e8f0', 
+              padding: '2rem',
+              transition: 'all 0.3s ease',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
+            }}>
+              <div className="secretary-header" style={{ display: 'flex', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                <div className="secretary-avatar" style={{ 
+                  width: '64px', 
+                  height: '64px', 
+                  background: 'linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%)', 
+                  borderRadius: '12px',
+                  flexShrink: 0
+                }}></div>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <h3 style={{ fontSize: '1.25rem', marginBottom: '0.25rem' }}>{sec.name}</h3>
-                    <div style={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: '0.25rem', 
-                      fontSize: '0.75rem', 
-                      background: '#dbeafe', 
-                      color: '#1e40af', 
-                      padding: '0.25rem 0.5rem', 
-                      borderRadius: '999px',
-                      fontWeight: '600'
-                    }}>
-                      <ShieldCheck size={12} /> Verified
+                    <div>
+                      <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#0f172a', marginBottom: '0.25rem' }}>{sec.name}</h3>
+                      <p style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: '500' }}>{sec.company}</p>
                     </div>
-                  </div>
-                  <p style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: '500' }}>{sec.company}</p>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', marginTop: '0.5rem', color: '#64748b' }}>
-                    <span>{sec.clients} clients served</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#f59e0b', fontWeight: '600', fontSize: '0.9rem' }}>
+                      <Star size={16} fill="#f59e0b" /> {sec.rating}
+                    </div>
                   </div>
                 </div>
               </div>
               
-              <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.9rem', color: '#475569', padding: '1rem 0', borderBottom: '1px solid #e2e8f0' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <MapPin size={16} /> {sec.location}
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: '1fr 1fr', 
+                gap: '1rem', 
+                padding: '1rem 0', 
+                borderTop: '1px solid #f1f5f9',
+                borderBottom: '1px solid #f1f5f9',
+                marginBottom: '1.5rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#64748b', fontSize: '0.9rem' }}>
+                  <MapPin size={16} className="text-blue-500" /> {sec.location}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Briefcase size={16} /> {sec.experience}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#64748b', fontSize: '0.9rem' }}>
+                  <Briefcase size={16} className="text-blue-500" /> {sec.experience}
                 </div>
               </div>
 
-              <div style={{ padding: '1rem 0' }}>
-                <div className="secretary-price">{sec.price}</div>
-                <ul className="secretary-features">
+              <div style={{ marginBottom: '2rem' }}>
+                <div className="secretary-price" style={{ fontSize: '1.5rem', fontWeight: '700', color: '#0f172a', marginBottom: '1rem' }}>
+                  {sec.price} <span style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: '400' }}>/ incorporation</span>
+                </div>
+                <ul className="secretary-features" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   {sec.features.map((feature, i) => (
-                    <li key={i}>
-                      <CheckCircle size={18} color="#2563eb" style={{ flexShrink: 0, marginTop: '2px' }} />
+                    <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', fontSize: '0.95rem', color: '#475569' }}>
+                      <CheckCircle size={18} color="#2563eb" style={{ flexShrink: 0, marginTop: '3px' }} />
                       {feature}
                     </li>
                   ))}
                 </ul>
               </div>
 
-              <Link to="/signup" className="btn btn-primary" style={{ width: '100%', marginTop: 'auto' }}>Incorporate with {sec.name.split(' ')[0]}</Link>
+              <Link to="/signup" className="btn btn-primary" style={{ 
+                width: '100%', 
+                justifyContent: 'center', 
+                padding: '0.875rem',
+                fontSize: '1rem',
+                fontWeight: '600',
+                borderRadius: '8px',
+                background: '#0f172a',
+                color: 'white',
+                border: 'none'
+              }}>
+                Select {sec.name.split(' ')[0]}
+              </Link>
             </div>
           ))}
         </div>

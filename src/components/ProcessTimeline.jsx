@@ -1,55 +1,115 @@
 import React from 'react';
+import { CreditCard, FileText, Clock, LayoutDashboard } from 'lucide-react';
 
 const steps = [
   {
-    title: "Payment",
-    description: "Proceed to secure checkout"
+    icon: <CreditCard size={24} />,
+    title: "Secure Payment",
+    description: "Choose your preferred company secretary and proceed to secure checkout via FPX or Credit Card."
   },
   {
-    title: "Begin incorporation",
-    description: "Your new Company Secretary will gather the required information and initiate the incorporation process with SSM."
+    icon: <FileText size={24} />,
+    title: "Digital Incorporation",
+    description: "Your secretary initiates the SSM registration process. Submit all documents digitally through our secure portal."
   },
   {
-    title: "3-5 Business days",
-    description: "Your Company should be ready in 3–5 business days."
+    icon: <Clock size={24} />,
+    title: "3-5 Business Days",
+    description: "Sit back while we handle the bureaucracy. Your company registration is typically approved within a standard business week."
   },
   {
-    title: "Manage your new Company",
-    description: "After registration, manage your company in the Anycomp Dashboard with regular updates from your Company Secretary"
+    icon: <LayoutDashboard size={24} />,
+    title: "Manage & Grow",
+    description: "Access your digital company dashboard to manage compliance, banking, and governance from anywhere."
   }
 ];
 
 export default function ProcessTimeline() {
   return (
-    <section className="section" style={{ background: 'white' }}>
+    <section className="section" style={{ background: 'white', padding: '8rem 0' }}>
       <div className="container">
-        <h2 className="section-title">Incorporation Process</h2>
-        <p className="section-subtitle">Simple, transparent steps to get your company registered.</p>
-        <div className="grid grid-2">
-          {steps.map((step, index) => (
-            <div key={index} style={{ display: 'flex', gap: '1.5rem', padding: '1rem' }}>
-              <div style={{ 
-                width: '40px', 
-                height: '40px', 
-                background: '#eff6ff', 
-                color: '#2563eb', 
-                borderRadius: '50%', 
+        <div style={{ textAlign: 'center', maxWidth: '700px', margin: '0 auto 5rem auto' }}>
+          <h2 className="section-title" style={{ fontSize: '2.5rem', marginBottom: '1.5rem', color: '#0f172a' }}>
+            How It Works
+          </h2>
+          <p className="section-subtitle" style={{ fontSize: '1.125rem', color: '#64748b' }}>
+            From payment to operation in four simple steps. We've streamlined the entire incorporation process.
+          </p>
+        </div>
+
+        <div style={{ position: 'relative', maxWidth: '1000px', margin: '0 auto' }}>
+          {/* Connecting Line (Desktop) */}
+          <div style={{ 
+            position: 'absolute', 
+            top: '24px', 
+            left: '50px', 
+            right: '50px', 
+            height: '2px', 
+            background: '#e2e8f0', 
+            zIndex: 0,
+            display: 'none', // Hidden on mobile by default, would need media query for desktop
+          }} className="timeline-line"></div>
+
+          <div className="grid" style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', 
+            gap: '3rem',
+            position: 'relative',
+            zIndex: 1
+          }}>
+            {steps.map((step, index) => (
+              <div key={index} style={{ 
                 display: 'flex', 
+                flexDirection: 'column', 
                 alignItems: 'center', 
-                justifyContent: 'center',
-                flexShrink: 0,
-                fontWeight: '700',
-                fontSize: '1.1rem',
-                border: '1px solid #dbeafe'
+                textAlign: 'center',
+                position: 'relative'
               }}>
-                {index + 1}
+                <div style={{ 
+                  width: '64px', 
+                  height: '64px', 
+                  background: 'white', 
+                  color: '#2563eb', 
+                  borderRadius: '16px', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  marginBottom: '1.5rem',
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                  border: '1px solid #eff6ff',
+                  position: 'relative',
+                  zIndex: 2
+                }}>
+                  {step.icon}
+                  <div style={{
+                    position: 'absolute',
+                    top: '-8px',
+                    right: '-8px',
+                    width: '24px',
+                    height: '24px',
+                    background: '#0f172a',
+                    color: 'white',
+                    borderRadius: '50%',
+                    fontSize: '0.75rem',
+                    fontWeight: '700',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '2px solid white'
+                  }}>
+                    {index + 1}
+                  </div>
+                </div>
+                
+                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#0f172a', marginBottom: '1rem' }}>
+                  {step.title}
+                </h3>
+                <p style={{ color: '#64748b', lineHeight: '1.6', fontSize: '0.95rem' }}>
+                  {step.description}
+                </p>
               </div>
-              <div>
-                <h3 style={{ marginBottom: '0.5rem', fontSize: '1.25rem' }}>{step.title}</h3>
-                <p style={{ color: '#475569', lineHeight: '1.6' }}>{step.description}</p>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </section>

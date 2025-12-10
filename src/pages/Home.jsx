@@ -1,8 +1,7 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
-import HowItWorks from '../components/HowItWorks';
-import GetStarted from '../components/GetStarted';
+import TrustedBy from '../components/TrustedBy';
 import ProcessTimeline from '../components/ProcessTimeline';
 import Secretaries from '../components/Secretaries';
 import Features from '../components/Features';
@@ -13,11 +12,10 @@ export default function Home() {
     <div className="home">
       <Navbar />
       <Hero />
-      <HowItWorks />
-      <GetStarted />
+      <TrustedBy />
+      <Features />
       <ProcessTimeline />
       <Secretaries />
-      <Features />
       <Footer />
     </div>
   );
