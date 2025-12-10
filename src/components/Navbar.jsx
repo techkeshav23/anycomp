@@ -27,9 +27,9 @@ export default function Navbar() {
           </Link>
           <ul className="nav-links" style={{ display: 'flex', gap: '2rem', listStyle: 'none', margin: 0, padding: 0 }}>
             <li><Link to="/register-company" style={{ fontSize: '0.9rem', fontWeight: '500', color: '#334155', textDecoration: 'none' }}>Register a company</Link></li>
-            <li><a href="#appoint" style={{ fontSize: '0.9rem', fontWeight: '500', color: '#334155', textDecoration: 'none' }}>Appoint a Company Secretary</a></li>
-            <li><a href="#services" style={{ fontSize: '0.9rem', fontWeight: '500', color: '#334155', textDecoration: 'none' }}>Company Secretarial Services</a></li>
-            <li><a href="#how-it-works" style={{ fontSize: '0.9rem', fontWeight: '500', color: '#334155', textDecoration: 'none' }}>How Anycomp Works</a></li>
+            <li><Link to="/appoint-secretary" style={{ fontSize: '0.9rem', fontWeight: '500', color: '#334155', textDecoration: 'none' }}>Appoint a Company Secretary</Link></li>
+            <li><Link to="/services" style={{ fontSize: '0.9rem', fontWeight: '500', color: '#334155', textDecoration: 'none' }}>Company Secretarial Services</Link></li>
+            <li><Link to="/how-it-works" style={{ fontSize: '0.9rem', fontWeight: '500', color: '#334155', textDecoration: 'none' }}>How Anycomp Works</Link></li>
           </ul>
         </div>
 
