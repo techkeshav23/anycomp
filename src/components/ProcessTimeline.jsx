@@ -29,27 +29,15 @@ export default function ProcessTimeline() {
     <section className="section" style={{ background: 'white', padding: '8rem 0' }}>
       <div className="container">
         <div style={{ textAlign: 'center', maxWidth: '700px', margin: '0 auto 5rem auto' }}>
-          <h2 className="section-title" style={{ fontSize: '2.5rem', marginBottom: '1.5rem', color: '#0f172a' }}>
+          <h2 className="section-title" style={{ fontSize: '2.5rem', marginBottom: '1.5rem', color: '#0f172a', fontWeight: '700' }}>
             How It Works
           </h2>
-          <p className="section-subtitle" style={{ fontSize: '1.125rem', color: '#64748b' }}>
+          <p className="section-subtitle" style={{ fontSize: '1.125rem', color: '#64748b', lineHeight: '1.6' }}>
             From payment to operation in four simple steps. We've streamlined the entire incorporation process.
           </p>
         </div>
 
         <div style={{ position: 'relative', maxWidth: '1000px', margin: '0 auto' }}>
-          {/* Connecting Line (Desktop) */}
-          <div style={{ 
-            position: 'absolute', 
-            top: '24px', 
-            left: '50px', 
-            right: '50px', 
-            height: '2px', 
-            background: '#e2e8f0', 
-            zIndex: 0,
-            display: 'none', // Hidden on mobile by default, would need media query for desktop
-          }} className="timeline-line"></div>
-
           <div className="grid" style={{ 
             display: 'grid', 
             gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', 
@@ -68,15 +56,13 @@ export default function ProcessTimeline() {
                 <div style={{ 
                   width: '64px', 
                   height: '64px', 
-                  background: 'white', 
+                  background: '#eff6ff', 
                   color: '#2563eb', 
                   borderRadius: '16px', 
                   display: 'flex', 
                   alignItems: 'center', 
                   justifyContent: 'center',
                   marginBottom: '1.5rem',
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                  border: '1px solid #eff6ff',
                   position: 'relative',
                   zIndex: 2
                 }}>
@@ -100,13 +86,8 @@ export default function ProcessTimeline() {
                     {index + 1}
                   </div>
                 </div>
-                
-                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#0f172a', marginBottom: '1rem' }}>
-                  {step.title}
-                </h3>
-                <p style={{ color: '#64748b', lineHeight: '1.6', fontSize: '0.95rem' }}>
-                  {step.description}
-                </p>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#0f172a', marginBottom: '0.75rem' }}>{step.title}</h3>
+                <p style={{ color: '#64748b', lineHeight: '1.6', fontSize: '1rem' }}>{step.description}</p>
               </div>
             ))}
           </div>
