@@ -23,7 +23,7 @@ export default function Footer() {
             </p>
             <div style={{ color: '#64748b', fontSize: '0.9rem' }}>
               ST Comp Holding Sdn Bhd<br/>
-              Registration No. 202401000000 (123456-A)
+              Registration No. 202501000000 (123456-A)
             </div>
           </div>
           
@@ -58,7 +58,7 @@ export default function Footer() {
         </div>
         
         <div style={{ marginTop: '5rem', paddingTop: '2rem', borderTop: '1px solid #1e293b', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#64748b', fontSize: '0.9rem' }}>
-          <div>© 2024 Anycomp. All rights reserved.</div>
+          <div>© 2025 Anycomp. All rights reserved.</div>
           <div style={{ display: 'flex', gap: '1.5rem' }}>
             <a href="#" style={{ color: '#64748b', textDecoration: 'none' }}>Twitter</a>
             <a href="#" style={{ color: '#64748b', textDecoration: 'none' }}>LinkedIn</a>
