@@ -153,6 +153,7 @@ export default function ServicesPage() {
     is_draft: true,
     verification_status: 'pending' as const,
     serviceOfferings: [],
+    media: [] as { id: string; file_name: string; display_order: number }[],
   };
 
   const currentSpecialist = specialist || emptySpecialist;
