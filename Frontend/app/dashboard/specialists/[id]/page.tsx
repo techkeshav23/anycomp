@@ -32,7 +32,7 @@ interface Specialist {
   service_category?: string;
   supported_company_types?: string[];
   serviceOfferings?: ServiceOffering[];
-  media?: { id: string; file_name: string; media_type?: string; display_order?: number }[];
+  media?: { id: string; file_name: string; display_order: number }[];
   created_at: string;
   updated_at: string;
 }
