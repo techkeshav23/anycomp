@@ -15,8 +15,25 @@ dotenv.config();
 const app: Application = express();
 
 // Middleware
+const allowedOrigins = [
+  'http://localhost:3000',
+  process.env.CLIENT_URL?.replace(/\/$/, ''), // Remove trailing slash if present
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    
+    // Remove trailing slash from origin for comparison
+    const normalizedOrigin = origin.replace(/\/$/, '');
+    
+    if (allowedOrigins.includes(normalizedOrigin)) {
+      callback(null, origin);
+    } else {
+      callback(null, true); // Allow all origins in development, you can restrict in production
+    }
+  },
   credentials: true,
 }));
 app.use(express.json());

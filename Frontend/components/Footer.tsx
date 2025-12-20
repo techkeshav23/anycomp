@@ -23,14 +23,14 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/esignature" className="text-[#4a9eff] hover:text-white text-sm transition-colors">
+                <span className="text-[#4a9eff] hover:text-white text-sm transition-colors cursor-pointer">
                   eSignature
-                </Link>
+                </span>
               </li>
               <li>
-                <Link href="/documents" className="text-[#4a9eff] hover:text-white text-sm transition-colors">
+                <span className="text-[#4a9eff] hover:text-white text-sm transition-colors cursor-pointer">
                   Documents & File Storage
-                </Link>
+                </span>
               </li>
               <li>
                 <Link href="/how-it-works" className="text-[#4a9eff] hover:text-white text-sm transition-colors">
@@ -50,19 +50,19 @@ export default function Footer() {
             <h3 className="text-[#8b9dc3] font-medium text-sm mb-4">Company Secretary</h3>
             <ul className="space-y-3">
               <li>
-                <Link href="/partner" className="text-[#4a9eff] hover:text-white text-sm transition-colors">
+                <span className="text-[#4a9eff] hover:text-white text-sm transition-colors cursor-pointer">
                   Partner with Anycomp
-                </Link>
+                </span>
               </li>
               <li>
-                <Link href="/how-it-works-cosec" className="text-[#4a9eff] hover:text-white text-sm transition-colors">
+                <Link href="/how-it-works" className="text-[#4a9eff] hover:text-white text-sm transition-colors">
                   How Anycomp works - CoSec
                 </Link>
               </li>
               <li>
-                <Link href="/get-verified" className="text-[#4a9eff] hover:text-white text-sm transition-colors">
+                <span className="text-[#4a9eff] hover:text-white text-sm transition-colors cursor-pointer">
                   Get verified
-                </Link>
+                </span>
               </li>
             </ul>
           </div>
@@ -72,24 +72,24 @@ export default function Footer() {
             <h3 className="text-[#8b9dc3] font-medium text-sm mb-4">Company</h3>
             <ul className="space-y-3">
               <li>
-                <Link href="/about" className="text-[#4a9eff] hover:text-white text-sm transition-colors">
+                <span className="text-[#4a9eff] hover:text-white text-sm transition-colors cursor-pointer">
                   About us
-                </Link>
+                </span>
               </li>
               <li>
-                <Link href="/contact" className="text-[#4a9eff] hover:text-white text-sm transition-colors">
+                <span className="text-[#4a9eff] hover:text-white text-sm transition-colors cursor-pointer">
                   Contact us
-                </Link>
+                </span>
               </li>
               <li>
-                <Link href="/partners" className="text-[#4a9eff] hover:text-white text-sm transition-colors">
+                <span className="text-[#4a9eff] hover:text-white text-sm transition-colors cursor-pointer">
                   Partners
-                </Link>
+                </span>
               </li>
               <li>
-                <Link href="/careers" className="text-[#4a9eff] hover:text-white text-sm transition-colors">
+                <span className="text-[#4a9eff] hover:text-white text-sm transition-colors cursor-pointer">
                   Careers
-                </Link>
+                </span>
               </li>
             </ul>
           </div>
@@ -120,15 +120,15 @@ export default function Footer() {
             © ST COMP HOLDING SDN BHD
           </div>
           <div className="flex items-center gap-6">
-            <Link href="/privacy" className="text-[#4a9eff] hover:text-white text-xs transition-colors">
+            <span className="text-[#4a9eff] hover:text-white text-xs transition-colors cursor-pointer">
               Privacy Policy
-            </Link>
-            <Link href="/terms" className="text-[#4a9eff] hover:text-white text-xs transition-colors">
+            </span>
+            <span className="text-[#4a9eff] hover:text-white text-xs transition-colors cursor-pointer">
               Terms of Service
-            </Link>
-            <Link href="/payment-terms" className="text-[#4a9eff] hover:text-white text-xs transition-colors">
+            </span>
+            <span className="text-[#4a9eff] hover:text-white text-xs transition-colors cursor-pointer">
               Payment Terms
-            </Link>
+            </span>
           </div>
         </div>
       </div>
