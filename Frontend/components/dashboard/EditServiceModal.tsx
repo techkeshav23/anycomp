@@ -269,8 +269,8 @@ export default function EditServiceModal({ specialist, onClose, onSave }: EditSe
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex justify-end z-50">
-      <div className="bg-white w-full max-w-xl h-full shadow-xl flex flex-col">
+    <div className="fixed inset-0 bg-black/50 flex justify-center sm:justify-end z-50">
+      <div className="bg-white w-full sm:max-w-xl h-full shadow-xl flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 shrink-0">
           <h2 className="text-lg font-semibold text-gray-900">Edit Service</h2>
@@ -496,7 +496,7 @@ export default function EditServiceModal({ specialist, onClose, onSave }: EditSe
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-gray-200">
             <button
               type="button"
               onClick={onClose}

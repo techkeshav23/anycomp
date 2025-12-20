@@ -161,11 +161,11 @@ export default function ServicesPage() {
   const totalPrice = basePrice + platformFee;
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       {/* Title and Buttons Row */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">
+          <h1 className="text-lg sm:text-xl font-semibold text-gray-900">
             {currentSpecialist.title || 'Register a new company'} | Private Limited - Sdn Bhd
           </h1>
           {/* Status indicator */}
@@ -189,28 +189,28 @@ export default function ServicesPage() {
         <div className="flex gap-2">
           <button
             onClick={() => setShowEditModal(true)}
-            className="px-5 py-2 border border-blue-900 text-blue-900 rounded-md text-sm font-medium hover:bg-blue-50 transition"
+            className="flex-1 sm:flex-initial px-4 sm:px-5 py-2 border border-blue-900 text-blue-900 rounded-md text-sm font-medium hover:bg-blue-50 transition"
           >
             Edit
           </button>
           {currentSpecialist.is_draft ? (
             <button
               onClick={handlePublish}
-              className="px-5 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 transition"
+              className="flex-1 sm:flex-initial px-4 sm:px-5 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 transition"
             >
               Submit for Approval
             </button>
           ) : currentSpecialist.verification_status === 'under_review' ? (
             <button
               disabled
-              className="px-5 py-2 bg-yellow-500 text-white rounded-md text-sm font-medium cursor-not-allowed"
+              className="flex-1 sm:flex-initial px-4 sm:px-5 py-2 bg-yellow-500 text-white rounded-md text-sm font-medium cursor-not-allowed"
             >
               Awaiting Approval
             </button>
           ) : (
             <button
               onClick={handlePublish}
-              className="px-5 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 transition"
+              className="flex-1 sm:flex-initial px-4 sm:px-5 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 transition"
             >
               Unpublish
             </button>
@@ -218,13 +218,13 @@ export default function ServicesPage() {
         </div>
       </div>
 
-      <div className="flex gap-6">
+      <div className="flex flex-col lg:flex-row gap-6">
         {/* Left Content */}
         <div className="flex-1 space-y-6">
           {/* Image Gallery */}
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-4">
             {/* Main Image */}
-            <div className="w-1/2 aspect-[4/3] rounded-lg overflow-hidden bg-gray-50 border border-gray-200">
+            <div className="w-full sm:w-1/2 aspect-[4/3] rounded-lg overflow-hidden bg-gray-50 border border-gray-200">
               {currentSpecialist.media && currentSpecialist.media.length > 0 ? (
                 <img
                   src={currentSpecialist.media[0].file_name}
@@ -242,7 +242,7 @@ export default function ServicesPage() {
               )}
             </div>
             {/* Right Side Images */}
-            <div className="w-1/2 grid grid-cols-2 gap-3">
+            <div className="w-full sm:w-1/2 grid grid-cols-2 gap-3">
               {currentSpecialist.media && currentSpecialist.media.length > 1 ? (
                 currentSpecialist.media.slice(1, 5).map((media, index) => (
                   <div key={media.file_name} className="aspect-square rounded-lg overflow-hidden bg-gray-100">
@@ -342,8 +342,8 @@ export default function ServicesPage() {
         </div>
 
         {/* Right Sidebar - Professional Fee */}
-        <div className="w-80 shrink-0">
-          <div className="bg-white border border-gray-200 rounded-lg p-6 sticky top-6">
+        <div className="w-full lg:w-80 shrink-0">
+          <div className="bg-white border border-gray-200 rounded-lg p-4 sm:p-6 lg:sticky lg:top-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-1">Professional Fee</h2>
             <p className="text-sm text-gray-500 mb-4">Set a rate for your service</p>
             

@@ -44,30 +44,30 @@ export default function HowItWorks() {
       <Navbar />
       <div className="pt-20 min-h-screen bg-slate-50">
         
-        <div className="bg-slate-950 text-white py-20">
-          <div className="max-w-5xl mx-auto px-6 text-center">
-            <h1 className="text-4xl font-extrabold mb-6">How Anycomp Works</h1>
-            <p className="text-lg text-slate-300 max-w-2xl mx-auto">
+        <div className="bg-slate-950 text-white py-12 sm:py-20">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-4 sm:mb-6">How Anycomp Works</h1>
+            <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto">
               We&apos;ve simplified the company registration process into a few easy steps. No paperwork, no queues.
             </p>
           </div>
         </div>
 
-        <div className="max-w-4xl mx-auto py-16 px-6">
-          <div className="flex flex-col gap-8">
+        <div className="max-w-4xl mx-auto py-10 sm:py-16 px-4 sm:px-6">
+          <div className="flex flex-col gap-4 sm:gap-8">
             {steps.map((step, index) => (
-              <div key={index} className="flex gap-8 bg-white p-8 rounded-2xl border border-slate-200 items-start">
-                <div className="text-5xl font-extrabold text-slate-100 leading-none">{step.number}</div>
+              <div key={index} className="flex flex-col sm:flex-row gap-4 sm:gap-8 bg-white p-5 sm:p-8 rounded-xl sm:rounded-2xl border border-slate-200 items-start">
+                <div className="text-3xl sm:text-5xl font-extrabold text-slate-100 leading-none">{step.number}</div>
                 <div>
-                  <h3 className="text-2xl font-bold text-slate-900 mb-3">{step.title}</h3>
-                  <p className="text-slate-600 leading-relaxed text-lg">{step.description}</p>
+                  <h3 className="text-lg sm:text-2xl font-bold text-slate-900 mb-2 sm:mb-3">{step.title}</h3>
+                  <p className="text-slate-600 leading-relaxed text-sm sm:text-lg">{step.description}</p>
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="text-center mt-16">
-            <Link href="/services" className="inline-flex items-center gap-2 py-4 px-10 text-lg font-semibold bg-blue-600 text-white rounded-lg no-underline hover:bg-blue-700 transition-colors">
+          <div className="text-center mt-10 sm:mt-16">
+            <Link href="/services" className="inline-flex items-center gap-2 py-3 sm:py-4 px-6 sm:px-10 text-base sm:text-lg font-semibold bg-blue-600 text-white rounded-lg no-underline hover:bg-blue-700 transition-colors">
               Browse Services <ArrowRight size={20} />
             </Link>
           </div>

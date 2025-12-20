@@ -254,15 +254,15 @@ export default function SpecialistsPage() {
 
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Specialists</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Specialists</h1>
         <p className="text-gray-500 text-sm">
           Create and publish your services for Client's & Companies
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200 mb-6">
-        <div className="flex gap-8">
+      <div className="border-b border-gray-200 mb-6 overflow-x-auto">
+        <div className="flex gap-4 sm:gap-8 min-w-max">
           {['All', 'Drafts', 'Published'].map((tab) => (
             <button
               key={tab}
@@ -270,7 +270,7 @@ export default function SpecialistsPage() {
                 setActiveTab(tab);
                 setCurrentPage(1);
               }}
-              className={`pb-3 text-sm font-medium transition-colors relative ${
+              className={`pb-3 text-sm font-medium transition-colors relative whitespace-nowrap ${
                 activeTab === tab
                   ? 'text-gray-900 border-b-2 border-blue-900'
                   : 'text-gray-500 hover:text-gray-700'
@@ -283,7 +283,7 @@ export default function SpecialistsPage() {
       </div>
 
       {/* Search and Actions */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-6">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
@@ -294,18 +294,18 @@ export default function SpecialistsPage() {
               setSearchQuery(e.target.value);
               setCurrentPage(1);
             }}
-            className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
+            className="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <div className="flex gap-3">
           <Link
             href="/dashboard/specialists/create"
-            className="flex items-center gap-2 px-4 py-2 bg-blue-900 text-white rounded-lg text-sm font-medium hover:bg-blue-800 transition-colors"
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 bg-blue-900 text-white rounded-lg text-sm font-medium hover:bg-blue-800 transition-colors"
           >
             <Plus className="w-4 h-4" />
             Create
           </Link>
-          <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+          <button className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
             <Download className="w-4 h-4" />
             Export
           </button>
@@ -313,8 +313,8 @@ export default function SpecialistsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-visible">
-        <table className="w-full">
+      <div className="bg-white rounded-lg border border-gray-200 overflow-x-auto">
+        <table className="w-full min-w-[800px]">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               <th className="px-4 py-3 text-left">
@@ -471,14 +471,14 @@ export default function SpecialistsPage() {
 
         {/* Pagination */}
         {pagination && pagination.totalPages > 1 && (
-          <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-center gap-2">
+          <div className="px-4 py-3 border-t border-gray-200 flex flex-wrap items-center justify-center gap-2">
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={!pagination.hasPrevPage}
               className="flex items-center gap-1 px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronLeft className="w-4 h-4" />
-              Previous
+              <span className="hidden sm:inline">Previous</span>
             </button>
             <div className="flex gap-1">
               {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
@@ -518,7 +518,7 @@ export default function SpecialistsPage() {
               disabled={!pagination.hasNextPage}
               className="flex items-center gap-1 px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Next
+              <span className="hidden sm:inline">Next</span>
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>

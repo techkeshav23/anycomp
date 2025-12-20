@@ -16,6 +16,8 @@ import {
   ChevronDown,
   Bell,
   Search,
+  Menu,
+  X,
 } from 'lucide-react';
 
 interface User {
@@ -59,6 +61,7 @@ export default function DashboardLayout({
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     // Check if user is logged in
@@ -94,11 +97,27 @@ export default function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
+      {/* Mobile Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r border-gray-200 flex flex-col fixed h-full">
+      <aside className={`w-64 bg-white border-r border-gray-200 flex flex-col fixed h-full z-50 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
         {/* Profile Section */}
         <div className="p-4 border-b border-gray-200">
-          <div className="text-sm text-gray-500 mb-2">Profile</div>
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-gray-500 mb-2">Profile</div>
+            <button 
+              onClick={() => setSidebarOpen(false)}
+              className="lg:hidden p-1 text-gray-500 hover:text-gray-700"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-blue-900 flex items-center justify-center text-white font-semibold">
               {user?.name?.charAt(0) || 'U'}
@@ -122,6 +141,7 @@ export default function DashboardLayout({
                 <li key={item.name}>
                   <Link
                     href={item.href}
+                    onClick={() => setSidebarOpen(false)}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
                       isActive
                         ? 'bg-blue-900 text-white'
@@ -144,6 +164,7 @@ export default function DashboardLayout({
               <li key={item.name}>
                 <Link
                   href={item.href}
+                  onClick={() => setSidebarOpen(false)}
                   className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
                 >
                   <item.icon className="w-5 h-5" />
@@ -165,12 +186,19 @@ export default function DashboardLayout({
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 ml-64">
-        {/* Top Header - Only show for admin */}
-        {user?.role === 'admin' && (
-          <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
-            <div className="flex items-center gap-4 flex-1">
-              <div className="relative flex-1 max-w-md">
+      <main className="flex-1 lg:ml-64">
+        {/* Top Header */}
+        <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+          <div className="flex items-center gap-4 flex-1">
+            {/* Mobile Menu Button */}
+            <button 
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden p-2 text-gray-600 hover:text-gray-900"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+            {user?.role === 'admin' && (
+              <div className="relative flex-1 max-w-md hidden sm:block">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
@@ -178,24 +206,24 @@ export default function DashboardLayout({
                   className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
+            )}
+          </div>
+          <div className="flex items-center gap-2 sm:gap-4">
+            <button className="relative p-2 text-gray-400 hover:text-gray-600">
+              <Mail className="w-5 h-5" />
+            </button>
+            <button className="relative p-2 text-gray-400 hover:text-gray-600">
+              <Bell className="w-5 h-5" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+            </button>
+            <div className="w-8 h-8 rounded-full bg-blue-900 flex items-center justify-center text-white text-sm font-semibold">
+              {user?.name?.charAt(0) || 'U'}
             </div>
-            <div className="flex items-center gap-4">
-              <button className="relative p-2 text-gray-400 hover:text-gray-600">
-                <Mail className="w-5 h-5" />
-              </button>
-              <button className="relative p-2 text-gray-400 hover:text-gray-600">
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
-              <div className="w-8 h-8 rounded-full bg-blue-900 flex items-center justify-center text-white text-sm font-semibold">
-                {user?.name?.charAt(0) || 'U'}
-              </div>
-            </div>
-          </header>
-        )}
+          </div>
+        </header>
 
         {/* Page Content */}
-        <div className={user?.role === 'admin' ? 'p-6' : ''}>{children}</div>
+        <div className="p-4 sm:p-6">{children}</div>
       </main>
     </div>
   );

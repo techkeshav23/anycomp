@@ -86,14 +86,14 @@ export default function Services() {
 
       {/* Page Header */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-1">Register a New Company</h1>
-          <p className="text-gray-600">Get Your Company Registered with a Trusted Company Secretary</p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">Register a New Company</h1>
+          <p className="text-sm sm:text-base text-gray-600">Get Your Company Registered with a Trusted Company Secretary</p>
         </div>
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Main Content */}
         <div className="flex-1">
           {loading ? (
@@ -101,18 +101,19 @@ export default function Services() {
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#1e3a5f]"></div>
             </div>
           ) : sortedSpecialists.length === 0 ? (
-            <div className="text-center py-16 bg-white rounded-lg border border-gray-200">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Search size={24} className="text-gray-400" />
+            <div className="text-center py-12 sm:py-16 bg-white rounded-lg border border-gray-200">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Search size={20} className="text-gray-400 sm:hidden" />
+                <Search size={24} className="text-gray-400 hidden sm:block" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No services found</h3>
-                <p className="text-gray-500 mb-4">Try adjusting your search or filter criteria</p>
-                <p className="text-sm text-gray-400">Showing all 0 items</p>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">No services found</h3>
+                <p className="text-sm sm:text-base text-gray-500 mb-4">Try adjusting your search or filter criteria</p>
+                <p className="text-xs sm:text-sm text-gray-400">Showing all 0 items</p>
               </div>
             ) : (
               <>
                 {/* Sort Bar */}
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
                   <p className="text-sm text-gray-600">
                     Showing {sortedSpecialists.length} service{sortedSpecialists.length !== 1 ? 's' : ''}
                   </p>
@@ -121,7 +122,7 @@ export default function Services() {
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
-                      className="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-[#1e3a5f]"
+                      className="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-[#1e3a5f] flex-1 sm:flex-initial"
                     >
                       <option value="recommended">Recommended</option>
                       <option value="price-low">Price: Low to High</option>
@@ -132,7 +133,7 @@ export default function Services() {
                 </div>
 
                 {/* Services Grid */}
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
                   {sortedSpecialists.map((specialist) => (
                     <Link
                       key={specialist.id}

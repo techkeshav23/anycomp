@@ -145,25 +145,25 @@ export default function SpecialistDetailPage() {
   return (
     <div>
       {/* Breadcrumb */}
-      <div className="text-sm text-gray-500 mb-2">
+      <div className="text-xs sm:text-sm text-gray-500 mb-2">
         Dashboard &gt; <Link href="/dashboard/specialists" className="hover:text-gray-700">Services</Link> &gt;{' '}
         <span className="text-gray-900">Service Page</span>
       </div>
 
       {/* Title and Actions */}
-      <div className="flex items-start justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">{specialist.title}</h1>
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{specialist.title}</h1>
         <div className="flex gap-3">
           <button
             onClick={() => setIsEditModalOpen(true)}
-            className="px-6 py-2 bg-blue-900 text-white rounded-lg text-sm font-medium hover:bg-blue-800 transition-colors"
+            className="flex-1 sm:flex-initial px-4 sm:px-6 py-2 bg-blue-900 text-white rounded-lg text-sm font-medium hover:bg-blue-800 transition-colors"
           >
             Edit
           </button>
           {userRole === 'admin' && (
             <button
               onClick={handlePublish}
-              className={`px-6 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`flex-1 sm:flex-initial px-4 sm:px-6 py-2 rounded-lg text-sm font-medium transition-colors ${
                 !specialist.is_draft
                   ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                   : 'bg-blue-600 text-white hover:bg-blue-700'
@@ -175,11 +175,11 @@ export default function SpecialistDetailPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content */}
-        <div className="col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-6">
           {/* Image Upload Area */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="aspect-video bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center">
               <Upload className="w-8 h-8 text-gray-400 mb-2" />
               <p className="text-sm text-gray-500">Upload an image for your service listing in PNG, JPG or JPEG</p>
@@ -261,8 +261,8 @@ export default function SpecialistDetailPage() {
         </div>
 
         {/* Sidebar - Professional Fee */}
-        <div className="col-span-1">
-          <div className="bg-white rounded-lg border border-gray-200 p-6 sticky top-24">
+        <div className="lg:col-span-1">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 lg:sticky lg:top-24">
             <h3 className="text-lg font-semibold text-gray-900 mb-1">Professional Fee</h3>
             <p className="text-sm text-gray-500 mb-4">Set a rate for your service</p>
 

@@ -111,7 +111,7 @@ export default function CreateSpecialistPage() {
   return (
     <div className="max-w-3xl mx-auto">
       {/* Breadcrumb */}
-      <div className="text-sm text-gray-500 mb-2">
+      <div className="text-xs sm:text-sm text-gray-500 mb-2">
         Dashboard &gt;{' '}
         <Link href="/dashboard/specialists" className="hover:text-gray-700">
           Services
@@ -120,18 +120,18 @@ export default function CreateSpecialistPage() {
       </div>
 
       {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex items-center gap-3 sm:gap-4 mb-6">
         <Link
           href="/dashboard/specialists"
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900">Create New Specialist</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Create New Specialist</h1>
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200 p-6">
+      <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
         {/* Title */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
@@ -176,7 +176,7 @@ export default function CreateSpecialistPage() {
         </div>
 
         {/* Duration and Price */}
-        <div className="grid grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Estimated Completion Time (Days)
@@ -212,7 +212,7 @@ export default function CreateSpecialistPage() {
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Additional Offerings
           </label>
-          <div className="flex gap-2 mb-3">
+          <div className="flex flex-col sm:flex-row gap-2 mb-3">
             <input
               type="text"
               value={newOffering.name}
@@ -220,23 +220,25 @@ export default function CreateSpecialistPage() {
               placeholder="Offering name"
               className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <input
-              type="number"
-              min="0"
-              value={newOffering.price || ''}
-              onChange={(e) =>
-                setNewOffering({ ...newOffering, price: parseFloat(e.target.value) || 0 })
-              }
-              placeholder="Price"
-              className="w-32 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <button
-              type="button"
-              onClick={addOffering}
-              className="p-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800"
-            >
-              <Plus className="w-5 h-5" />
-            </button>
+            <div className="flex gap-2">
+              <input
+                type="number"
+                min="0"
+                value={newOffering.price || ''}
+                onChange={(e) =>
+                  setNewOffering({ ...newOffering, price: parseFloat(e.target.value) || 0 })
+                }
+                placeholder="Price"
+                className="flex-1 sm:w-32 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                type="button"
+                onClick={addOffering}
+                className="p-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800"
+              >
+                <Plus className="w-5 h-5" />
+              </button>
+            </div>
           </div>
           <div className="flex flex-wrap gap-2">
             {offerings.map((offering, index) => (
@@ -258,10 +260,10 @@ export default function CreateSpecialistPage() {
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-gray-200">
           <Link
             href="/dashboard/specialists"
-            className="px-6 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="px-6 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 text-center"
           >
             Cancel
           </Link>

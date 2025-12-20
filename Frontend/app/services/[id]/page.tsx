@@ -138,7 +138,7 @@ export default function SpecialistDetail() {
         
         {/* Breadcrumb */}
         <div className="bg-white border-b border-gray-200">
-          <div className="max-w-6xl mx-auto px-6 py-4">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
             <Link 
               href="/services" 
               className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition text-sm"
@@ -149,7 +149,7 @@ export default function SpecialistDetail() {
           </div>
         </div>
 
-        <div className="max-w-6xl mx-auto py-8 px-6">
+        <div className="max-w-6xl mx-auto py-6 sm:py-8 px-4 sm:px-6">
           <div className="grid lg:grid-cols-3 gap-8">
             
             {/* Main Content */}
@@ -226,9 +226,9 @@ export default function SpecialistDetail() {
 
               {/* Service Info */}
               <div className="bg-white rounded-xl border border-gray-200 p-6">
-                <div className="flex items-start justify-between gap-4 mb-4">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4 mb-4">
                   <div>
-                    <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
                       {specialist.title}
                     </h1>
                     {specialist.service_category && (
@@ -311,7 +311,7 @@ export default function SpecialistDetail() {
 
             {/* Sidebar - Pricing & Order */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-xl border border-gray-200 p-6 sticky top-24">
+              <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 lg:sticky lg:top-24">
                 
                 {/* Base Price */}
                 <div className="mb-6">
