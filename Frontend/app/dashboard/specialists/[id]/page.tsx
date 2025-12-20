@@ -8,8 +8,11 @@ import EditServiceModal from '@/components/dashboard/EditServiceModal';
 
 interface ServiceOffering {
   id?: string;
-  name: string;
-  price: number;
+  title: string;
+  name?: string;
+  description?: string;
+  price?: number;
+  is_selected?: boolean;
 }
 
 interface Specialist {
@@ -26,8 +29,10 @@ interface Specialist {
   average_rating: number;
   total_number_of_ratings: number;
   duration_days: number;
-  serviceOfferings: ServiceOffering[];
-  media: { id: string; file_name: string; media_type: string }[];
+  service_category?: string;
+  supported_company_types?: string[];
+  serviceOfferings?: ServiceOffering[];
+  media?: { id: string; file_name: string; media_type?: string; display_order?: number }[];
   created_at: string;
   updated_at: string;
 }
@@ -225,7 +230,7 @@ export default function SpecialistDetailPage() {
                     key={offering.id || index}
                     className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 rounded-full text-sm"
                   >
-                    {offering.name} - RM {offering.price}
+                    {offering.title || offering.name} - RM {offering.price}
                   </span>
                 ))}
               </div>
