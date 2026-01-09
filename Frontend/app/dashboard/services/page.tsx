@@ -223,8 +223,8 @@ export default function ServicesPage() {
         {/* Left Content */}
         <div className="flex-1 space-y-6">
           {/* Image Gallery */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            {/* Main Image */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            {/* Main Image - Left */}
             <div className="w-full sm:w-1/2 aspect-[4/3] rounded-lg overflow-hidden bg-gray-50 border border-gray-200">
               {currentSpecialist.media && currentSpecialist.media.length > 0 ? (
                 <img
@@ -242,11 +242,11 @@ export default function ServicesPage() {
                 </div>
               )}
             </div>
-            {/* Right Side Images */}
-            <div className="w-full sm:w-1/2 grid grid-cols-2 gap-3">
+            {/* Right Side Images - 2x2 grid compact */}
+            <div className="w-full sm:w-1/2 grid grid-cols-2 gap-2">
               {currentSpecialist.media && currentSpecialist.media.length > 1 ? (
                 currentSpecialist.media.slice(1, 5).map((media, index) => (
-                  <div key={media.file_name} className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                  <div key={media.file_name} className="aspect-[4/3] rounded-md overflow-hidden bg-gray-100">
                     <img
                       src={media.file_name}
                       alt={`Service ${index + 2}`}
@@ -256,18 +256,18 @@ export default function ServicesPage() {
                 ))
               ) : (
                 <>
-                  <div className="aspect-square rounded-lg overflow-hidden bg-gradient-to-r from-blue-600 to-blue-800 relative">
-                    <div className="absolute inset-0 flex items-center justify-center p-4">
+                  <div className="aspect-[4/3] rounded-md overflow-hidden bg-gradient-to-r from-blue-600 to-blue-800 relative">
+                    <div className="absolute inset-0 flex items-center justify-center p-2">
                       <div className="text-white text-center">
-                        <p className="text-xs opacity-80">COMPANY</p>
-                        <p className="text-sm font-bold">10 Best Company Secretarial</p>
+                        <p className="text-[10px] opacity-80">COMPANY</p>
+                        <p className="text-xs font-bold">10 Best Company Secretarial</p>
                       </div>
                     </div>
                   </div>
-                  <div className="aspect-square rounded-lg overflow-hidden bg-gradient-to-r from-pink-500 to-rose-500 relative">
-                    <div className="absolute inset-0 flex items-center justify-center p-4">
+                  <div className="aspect-[4/3] rounded-md overflow-hidden bg-gradient-to-r from-pink-500 to-rose-500 relative">
+                    <div className="absolute inset-0 flex items-center justify-center p-2">
                       <div className="text-white text-center">
-                        <p className="text-xs">Company Secretary Key Role</p>
+                        <p className="text-[10px]">Company Secretary Key Role</p>
                       </div>
                     </div>
                   </div>
