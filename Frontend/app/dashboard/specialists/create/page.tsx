@@ -17,6 +17,7 @@ interface UploadedImage {
   url: string;
   file_name?: string;
   isNew?: boolean;
+  file?: File; // Store the actual file for backend upload
 }
 
 interface PlatformFeeTier {
@@ -168,8 +169,16 @@ export default function CreateSpecialistPage() {
         const data = await res.json();
         imageUrl = data.secure_url;
       } else {
-        // Create a local preview URL for now
+        // Create a local preview URL and store file for backend upload later
         imageUrl = URL.createObjectURL(file);
+        setImages([...images, {
+          url: imageUrl,
+          file_name: imageUrl,
+          isNew: true,
+          file: file, // Store file for backend upload after specialist is created
+        }]);
+        setUploading(false);
+        return;
       }
 
       setImages([...images, {
@@ -250,19 +259,34 @@ export default function CreateSpecialistPage() {
         // Save any uploaded images to the specialist
         if (images.length > 0) {
           for (const image of images) {
-            if (image.isNew && image.url) {
+            if (image.isNew) {
               try {
-                await fetch(`${API_URL}/api/media/save-url/${specialistId}`, {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                  },
-                  body: JSON.stringify({
-                    url: image.url,
-                    mime_type: 'image/jpeg',
-                  }),
-                });
+                // If we have the actual file (blob URL case), upload via backend
+                if (image.file) {
+                  const formData = new FormData();
+                  formData.append('image', image.file);
+                  
+                  await fetch(`${API_URL}/api/media/upload/${specialistId}`, {
+                    method: 'POST',
+                    headers: {
+                      Authorization: `Bearer ${token}`,
+                    },
+                    body: formData,
+                  });
+                } else if (image.url && !image.url.startsWith('blob:')) {
+                  // Only save URL if it's a valid Cloudinary URL (not blob)
+                  await fetch(`${API_URL}/api/media/save-url/${specialistId}`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                      url: image.url,
+                      mime_type: 'image/jpeg',
+                    }),
+                  });
+                }
               } catch (err) {
                 console.error('Failed to save image:', err);
               }
