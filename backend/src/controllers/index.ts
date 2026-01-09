@@ -3,6 +3,7 @@ export {
   getAllSpecialists,
   getSpecialistById,
   createSpecialist,
+  updateSpecialist,
   publishSpecialist,
   unpublishSpecialist,
   deleteSpecialist,

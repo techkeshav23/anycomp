@@ -10,6 +10,7 @@ import {
   submitForReview,
   publishMyProfile,
   createSpecialist,
+  updateSpecialist,
   publishSpecialist,
   unpublishSpecialist,
   deleteSpecialist,
@@ -57,6 +58,8 @@ router.get('/:id', optionalAuth, getSpecialistById);
 // ============================================
 // Create a new specialist (admin)
 router.post('/', protect, authorize('admin'), createSpecialist);
+// Update a specialist (admin)
+router.put('/:id', protect, authorize('admin'), updateSpecialist);
 // Publish/Approve a specialist
 router.patch('/:id/publish', protect, authorize('admin'), publishSpecialist);
 // Unpublish a specialist

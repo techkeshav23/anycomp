@@ -668,6 +668,98 @@ export const createSpecialist = async (
   }
 };
 
+// @desc    Update a specialist (Admin can update any specialist)
+// @route   PUT /api/specialists/:id
+// @access  Private (Admin only)
+export const updateSpecialist = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const {
+      title,
+      description,
+      base_price,
+      duration_days,
+      service_category,
+      supported_company_types,
+      serviceOfferings,
+    } = req.body;
+
+    const specialistRepository = getSpecialistRepository();
+    const serviceOfferingRepository = getServiceOfferingRepository();
+
+    // Find the specialist
+    const specialist = await specialistRepository.findOne({
+      where: { id },
+      relations: ['serviceOfferings'],
+    }) as ISpecialist | null;
+
+    if (!specialist) {
+      res.status(404).json({
+        success: false,
+        message: 'Specialist not found',
+      });
+      return;
+    }
+
+    // Update fields
+    if (title) {
+      specialist.title = title;
+      specialist.slug = generateSlug(title, specialist.id);
+    }
+    if (description !== undefined) specialist.description = description;
+    if (duration_days) specialist.duration_days = duration_days;
+
+    // Recalculate price if base_price changed
+    if (base_price !== undefined) {
+      const priceData = await calculateFinalPrice(parseFloat(String(base_price)) || 0);
+      specialist.base_price = parseFloat(String(base_price)) || 0;
+      specialist.platform_fee = priceData.platform_fee;
+      specialist.final_price = priceData.final_price;
+    }
+
+    await specialistRepository.save(specialist);
+
+    // Update service offerings if provided
+    if (serviceOfferings && Array.isArray(serviceOfferings)) {
+      // Remove existing offerings
+      if (specialist.serviceOfferings && specialist.serviceOfferings.length > 0) {
+        await serviceOfferingRepository.remove(specialist.serviceOfferings as any);
+      }
+
+      // Add new offerings
+      for (const offering of serviceOfferings) {
+        const offeringName = offering.name || offering.title;
+        if (offeringName) {
+          const serviceOffering = serviceOfferingRepository.create({
+            name: offeringName,
+            price: parseFloat(String(offering.price)) || 0,
+            specialist: { id },
+          } as Partial<IServiceOffering>);
+          await serviceOfferingRepository.save(serviceOffering);
+        }
+      }
+    }
+
+    // Fetch updated specialist with relations
+    const updatedSpecialist = await specialistRepository.findOne({
+      where: { id },
+      relations: ['user', 'serviceOfferings', 'media'],
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Specialist updated successfully',
+      data: updatedSpecialist,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Publish a specialist (Admin approves - set is_draft = false, verification = approved)
 // @route   PATCH /api/specialists/:id/publish
 // @access  Private (Admin only)
