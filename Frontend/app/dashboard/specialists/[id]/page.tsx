@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Upload, X, ChevronDown, Loader2 } from 'lucide-react';
+import { ArrowLeft, Upload, X, ChevronDown, Loader2, AlertCircle } from 'lucide-react';
 import EditServiceModal from '@/components/dashboard/EditServiceModal';
 
 interface ServiceOffering {
@@ -46,6 +46,7 @@ export default function SpecialistDetailPage() {
   const [specialist, setSpecialist] = useState<Specialist | null>(null);
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
+  const [showPublishModal, setShowPublishModal] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [userRole, setUserRole] = useState<string>('user');
   const [showOfferings, setShowOfferings] = useState(false);
@@ -105,6 +106,7 @@ export default function SpecialistDetailPage() {
           is_draft: data.data.is_draft,
           verification_status: data.data.verification_status,
         } : null);
+        setShowPublishModal(false);
       } else {
         const data = await response.json();
         alert(data.message || 'Failed to update status');
@@ -184,22 +186,14 @@ export default function SpecialistDetailPage() {
           </button>
           {userRole === 'admin' && (
             <button
-              onClick={handlePublish}
-              disabled={publishing}
-              className={`flex-1 sm:flex-initial px-4 sm:px-6 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed ${
+              onClick={() => setShowPublishModal(true)}
+              className={`flex-1 sm:flex-initial px-4 sm:px-6 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 active:scale-95 ${
                 !specialist.is_draft
                   ? 'bg-gray-200 text-gray-700 hover:bg-gray-300 active:bg-gray-400'
                   : 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800'
               }`}
             >
-              {publishing ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  {specialist.is_draft ? 'Publishing...' : 'Unpublishing...'}
-                </>
-              ) : (
-                specialist.is_draft ? 'Publish' : 'Unpublish'
-              )}
+              {specialist.is_draft ? 'Publish' : 'Unpublish'}
             </button>
           )}
         </div>
@@ -367,6 +361,60 @@ export default function SpecialistDetailPage() {
           onClose={() => setIsEditModalOpen(false)}
           onSave={handleSave}
         />
+      )}
+
+      {/* Publish/Unpublish Confirmation Modal */}
+      {showPublishModal && (
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg border border-gray-200 max-w-2xl w-full mx-4">
+            {/* Modal Content */}
+            <div className="p-6">
+              <div className="flex gap-3">
+                <div className="flex-shrink-0 mt-0.5">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#071331' }}>
+                    <span className="text-white text-lg font-semibold">!</span>
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-semibold mb-2 leading-none" style={{ color: '#222222' }}>
+                    {specialist.is_draft ? 'Publish changes' : 'Unpublish service'}
+                  </h3>
+                  <p className="text-sm text-gray-500 mb-6">
+                    {specialist.is_draft 
+                      ? 'Do you want to publish these changes? It will appear in the marketplace listing'
+                      : 'Do you want to unpublish this service? It will be removed from the marketplace listing'
+                    }
+                  </p>
+                </div>
+              </div>
+
+              {/* Buttons - Right aligned */}
+              <div className="flex items-center justify-end gap-3">
+                <button
+                  onClick={() => setShowPublishModal(false)}
+                  disabled={publishing}
+                  className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 active:scale-95 transition-all disabled:opacity-50"
+                >
+                  Continue Editing
+                </button>
+                <button
+                  onClick={handlePublish}
+                  disabled={publishing}
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-900 rounded-lg hover:bg-blue-800 active:scale-95 transition-all disabled:opacity-70 flex items-center justify-center gap-2"
+                >
+                  {publishing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    'Save changes'
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
