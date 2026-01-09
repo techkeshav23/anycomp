@@ -13,6 +13,7 @@ import {
   ChevronRight,
   CheckCircle,
   XCircle,
+  Loader2,
 } from 'lucide-react';
 
 interface Specialist {
@@ -54,6 +55,7 @@ export default function SpecialistsPage() {
   const [actionMenuId, setActionMenuId] = useState<string | null>(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const [userRole, setUserRole] = useState<string>('user');
+  const [actionLoading, setActionLoading] = useState<string | null>(null); // 'approve' | 'reject' | 'delete' | null
 
   const handleActionClick = (e: React.MouseEvent, specialistId: string) => {
     e.stopPropagation();
@@ -118,6 +120,7 @@ export default function SpecialistsPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this specialist?')) return;
 
+    setActionLoading('delete');
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(`${API_URL}/api/specialists/${id}`, {
@@ -135,8 +138,10 @@ export default function SpecialistsPage() {
       }
     } catch (error) {
       console.error('Delete error:', error);
+    } finally {
+      setActionLoading(null);
+      setActionMenuId(null);
     }
-    setActionMenuId(null);
   };
 
   const handlePublish = async (id: string, isDraft: boolean) => {
@@ -163,6 +168,7 @@ export default function SpecialistsPage() {
   };
 
   const handleApprove = async (id: string) => {
+    setActionLoading('approve');
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(`${API_URL}/api/specialists/${id}/verify`, {
@@ -182,11 +188,14 @@ export default function SpecialistsPage() {
       }
     } catch (error) {
       console.error('Approve error:', error);
+    } finally {
+      setActionLoading(null);
+      setActionMenuId(null);
     }
-    setActionMenuId(null);
   };
 
   const handleReject = async (id: string) => {
+    setActionLoading('reject');
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(`${API_URL}/api/specialists/${id}/verify`, {
@@ -206,8 +215,10 @@ export default function SpecialistsPage() {
       }
     } catch (error) {
       console.error('Reject error:', error);
+    } finally {
+      setActionLoading(null);
+      setActionMenuId(null);
     }
-    setActionMenuId(null);
   };
 
   const getVerificationStatusBadge = (status: string) => {
@@ -441,26 +452,41 @@ export default function SpecialistsPage() {
                       <>
                         <button
                           onClick={() => handleApprove(actionMenuId)}
-                          className="flex items-center gap-2 px-4 py-2 text-sm text-green-600 hover:bg-green-50 w-full"
+                          disabled={actionLoading !== null}
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-green-600 hover:bg-green-50 w-full disabled:opacity-50 disabled:cursor-not-allowed active:bg-green-100 transition-all"
                         >
-                          <CheckCircle className="w-4 h-4" />
-                          Approve
+                          {actionLoading === 'approve' ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <CheckCircle className="w-4 h-4" />
+                          )}
+                          {actionLoading === 'approve' ? 'Approving...' : 'Approve'}
                         </button>
                         <button
                           onClick={() => handleReject(actionMenuId)}
-                          className="flex items-center gap-2 px-4 py-2 text-sm text-orange-600 hover:bg-orange-50 w-full"
+                          disabled={actionLoading !== null}
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-orange-600 hover:bg-orange-50 w-full disabled:opacity-50 disabled:cursor-not-allowed active:bg-orange-100 transition-all"
                         >
-                          <XCircle className="w-4 h-4" />
-                          Reject
+                          {actionLoading === 'reject' ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <XCircle className="w-4 h-4" />
+                          )}
+                          {actionLoading === 'reject' ? 'Rejecting...' : 'Reject'}
                         </button>
                       </>
                     )}
                     <button
                       onClick={() => handleDelete(actionMenuId)}
-                      className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full"
+                      disabled={actionLoading !== null}
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full disabled:opacity-50 disabled:cursor-not-allowed active:bg-red-100 transition-all"
                     >
-                      <Trash2 className="w-4 h-4" />
-                      Delete
+                      {actionLoading === 'delete' ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="w-4 h-4" />
+                      )}
+                      {actionLoading === 'delete' ? 'Deleting...' : 'Delete'}
                     </button>
                   </>
                 );

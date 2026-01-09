@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Upload, X, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Upload, X, ChevronDown, Loader2 } from 'lucide-react';
 import EditServiceModal from '@/components/dashboard/EditServiceModal';
 
 interface ServiceOffering {
@@ -45,6 +45,7 @@ export default function SpecialistDetailPage() {
   const router = useRouter();
   const [specialist, setSpecialist] = useState<Specialist | null>(null);
   const [loading, setLoading] = useState(true);
+  const [publishing, setPublishing] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [userRole, setUserRole] = useState<string>('user');
   const [showOfferings, setShowOfferings] = useState(false);
@@ -82,8 +83,9 @@ export default function SpecialistDetailPage() {
   };
 
   const handlePublish = async () => {
-    if (!specialist) return;
+    if (!specialist || publishing) return;
 
+    setPublishing(true);
     try {
       const token = localStorage.getItem('token');
       const endpoint = specialist.is_draft ? 'publish' : 'unpublish';
@@ -96,13 +98,21 @@ export default function SpecialistDetailPage() {
       });
 
       if (response.ok) {
-        fetchSpecialist();
+        const data = await response.json();
+        // Update state immediately without refetching
+        setSpecialist(prev => prev ? {
+          ...prev,
+          is_draft: data.data.is_draft,
+          verification_status: data.data.verification_status,
+        } : null);
       } else {
         const data = await response.json();
         alert(data.message || 'Failed to update status');
       }
     } catch (error) {
       console.error('Publish error:', error);
+    } finally {
+      setPublishing(false);
     }
   };
 
@@ -175,13 +185,21 @@ export default function SpecialistDetailPage() {
           {userRole === 'admin' && (
             <button
               onClick={handlePublish}
-              className={`flex-1 sm:flex-initial px-4 sm:px-6 py-2 rounded-lg text-sm font-medium transition-colors ${
+              disabled={publishing}
+              className={`flex-1 sm:flex-initial px-4 sm:px-6 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed ${
                 !specialist.is_draft
-                  ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
+                  ? 'bg-gray-200 text-gray-700 hover:bg-gray-300 active:bg-gray-400'
+                  : 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800'
               }`}
             >
-              {specialist.is_draft ? 'Publish' : 'Unpublish'}
+              {publishing ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  {specialist.is_draft ? 'Publishing...' : 'Unpublishing...'}
+                </>
+              ) : (
+                specialist.is_draft ? 'Publish' : 'Unpublish'
+              )}
             </button>
           )}
         </div>
