@@ -420,6 +420,24 @@ export const saveMediaUrl = async (
       return;
     }
 
+    // Validate URL - reject blob URLs as they are temporary browser URLs
+    if (url.startsWith('blob:')) {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid URL: blob URLs are not allowed. Please upload the image file directly.',
+      });
+      return;
+    }
+
+    // Validate that it's a proper HTTP/HTTPS URL
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid URL: Only HTTP/HTTPS URLs are allowed.',
+      });
+      return;
+    }
+
     // Check if specialist exists and user has permission
     const specialistRepository = getSpecialistRepository();
     const specialist = await specialistRepository.findOne({
