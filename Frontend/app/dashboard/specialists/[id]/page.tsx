@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Upload, X } from 'lucide-react';
+import { ArrowLeft, Upload, X, ChevronDown } from 'lucide-react';
 import EditServiceModal from '@/components/dashboard/EditServiceModal';
 
 interface ServiceOffering {
@@ -47,6 +47,7 @@ export default function SpecialistDetailPage() {
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [userRole, setUserRole] = useState<string>('user');
+  const [showOfferings, setShowOfferings] = useState(false);
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -189,10 +190,10 @@ export default function SpecialistDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Image Gallery */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Image Gallery - Compact */}
+          <div className="flex gap-2 h-[180px]">
             {/* Main Image */}
-            <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+            <div className="w-1/2 h-full bg-gray-100 rounded-md overflow-hidden">
               {specialist.media && specialist.media.length > 0 ? (
                 <img
                   src={specialist.media[0].file_name}
@@ -201,51 +202,31 @@ export default function SpecialistDetailPage() {
                 />
               ) : (
                 <div className="w-full h-full border-2 border-dashed border-gray-300 flex flex-col items-center justify-center">
-                  <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                  <p className="text-sm text-gray-500">Upload an image for your service listing in PNG, JPG or JPEG</p>
-                  <p className="text-xs text-gray-400">up to 4MB</p>
+                  <Upload className="w-6 h-6 text-gray-400 mb-1" />
+                  <p className="text-[10px] text-gray-500 text-center px-2">Upload image</p>
+                  <p className="text-[10px] text-gray-400">PNG, JPG up to 4MB</p>
                 </div>
               )}
             </div>
-            {/* Secondary Images */}
-            <div className="grid grid-rows-2 gap-4">
+            {/* Secondary Images - 2x2 grid */}
+            <div className="w-1/2 h-full grid grid-cols-2 gap-1.5">
               {specialist.media && specialist.media.length > 1 ? (
-                <>
-                  <div className="rounded-lg overflow-hidden bg-gray-100">
+                specialist.media.slice(1, 5).map((media, index) => (
+                  <div key={media.id} className="rounded-md overflow-hidden bg-gray-100">
                     <img
-                      src={specialist.media[1]?.file_name}
-                      alt="Service image 2"
+                      src={media.file_name}
+                      alt={`Service image ${index + 2}`}
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  {specialist.media.length > 2 ? (
-                    <div className="rounded-lg overflow-hidden bg-gray-100">
-                      <img
-                        src={specialist.media[2]?.file_name}
-                        alt="Service image 3"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ) : (
-                    <div className="bg-gray-200 rounded-lg flex items-center justify-center p-4">
-                      <div className="text-center text-gray-500 text-sm">
-                        <p>No additional image</p>
-                      </div>
-                    </div>
-                  )}
-                </>
+                ))
               ) : (
                 <>
-                  <div className="bg-blue-800 rounded-lg flex items-center justify-center text-white p-4">
-                    <div className="text-center">
-                      <div className="text-lg font-bold">{specialist.title}</div>
-                    </div>
+                  <div className="bg-blue-800 rounded-md flex items-center justify-center text-white p-2">
+                    <p className="text-[10px] font-bold text-center leading-tight">{specialist.title}</p>
                   </div>
-                  <div className="bg-gray-200 rounded-lg flex items-center justify-center p-4">
-                    <div className="text-center text-gray-700 text-sm">
-                      <p className="font-semibold">Professional Service</p>
-                      <p>{specialist.duration_days} day{specialist.duration_days !== 1 ? 's' : ''} completion</p>
-                    </div>
+                  <div className="bg-gray-200 rounded-md flex items-center justify-center p-2">
+                    <p className="text-[10px] text-gray-600 text-center">{specialist.duration_days}d</p>
                   </div>
                 </>
               )}
@@ -260,23 +241,41 @@ export default function SpecialistDetailPage() {
             </p>
           </div>
 
-          {/* Additional Offerings */}
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">Additional Offerings</h2>
-            {specialist.serviceOfferings && specialist.serviceOfferings.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {specialist.serviceOfferings.map((offering, index) => (
-                  <span
-                    key={offering.id || index}
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
-                  >
-                    {offering.title || offering.name}
-                    {offering.price && offering.price > 0 ? ` - RM ${offering.price}` : ''}
+          {/* Additional Offerings - Collapsible */}
+          <div className="border border-gray-200 rounded-lg">
+            <button
+              type="button"
+              onClick={() => setShowOfferings(!showOfferings)}
+              className="w-full flex items-center justify-between p-3 text-left hover:bg-gray-50 transition"
+            >
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-semibold text-gray-900">Additional Offerings</h2>
+                {specialist.serviceOfferings && specialist.serviceOfferings.length > 0 && (
+                  <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full">
+                    {specialist.serviceOfferings.length}
                   </span>
-                ))}
+                )}
               </div>
-            ) : (
-              <p className="text-gray-400 text-sm italic">No additional offerings</p>
+              <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${showOfferings ? 'rotate-180' : ''}`} />
+            </button>
+            {showOfferings && (
+              <div className="px-3 pb-3 border-t border-gray-100">
+                {specialist.serviceOfferings && specialist.serviceOfferings.length > 0 ? (
+                  <div className="flex flex-wrap gap-1.5 pt-2">
+                    {specialist.serviceOfferings.map((offering, index) => (
+                      <span
+                        key={offering.id || index}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs"
+                      >
+                        {offering.title || offering.name}
+                        {offering.price && offering.price > 0 ? ` - RM ${offering.price}` : ''}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-400 text-xs italic pt-2">No additional offerings</p>
+                )}
+              </div>
             )}
           </div>
 
