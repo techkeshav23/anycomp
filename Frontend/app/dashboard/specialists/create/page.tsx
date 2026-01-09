@@ -483,8 +483,6 @@ export default function CreateSpecialistPage() {
                 </div>
               )}
             </div>
-              </div>
-            </div>
 
             {/* Service Images Card - Compact */}
             <div className="bg-white rounded-lg border border-gray-200 p-4">
