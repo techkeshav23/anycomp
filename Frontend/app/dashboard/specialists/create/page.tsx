@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, X, Upload, Loader2, Check, Plus } from 'lucide-react';
+import { ArrowLeft, X, Upload, Loader2, Check, Plus, ChevronDown } from 'lucide-react';
 
 interface ServiceOffering {
   title: string;
@@ -83,6 +83,7 @@ export default function CreateSpecialistPage() {
   
   const [selectedCompanyTypes, setSelectedCompanyTypes] = useState<string[]>([]);
   const [selectedOfferings, setSelectedOfferings] = useState<string[]>([]);
+  const [showOfferings, setShowOfferings] = useState(false);
   const [images, setImages] = useState<UploadedImage[]>([]);
   const [tempSpecialistId, setTempSpecialistId] = useState<string | null>(null);
 
@@ -427,77 +428,97 @@ export default function CreateSpecialistPage() {
               </div>
             </div>
 
-            {/* Additional Offerings Card */}
-            <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">Additional Offerings</h2>
-              <p className="text-xs text-gray-500 mb-3">Select the add-ons to offer with this service</p>
-              <div className="space-y-2 max-h-80 overflow-y-auto">
-                {AVAILABLE_OFFERINGS.map((offering, index) => (
-                  <div
-                    key={index}
-                    onClick={() => toggleOffering(offering.title)}
-                    className={`flex items-start gap-3 p-3 rounded-lg cursor-pointer transition ${
-                      selectedOfferings.includes(offering.title)
-                        ? 'bg-blue-50 border border-blue-200'
-                        : 'bg-gray-50 border border-transparent hover:bg-gray-100'
-                    }`}
-                  >
-                    <div className={`w-5 h-5 rounded border flex-shrink-0 flex items-center justify-center mt-0.5 ${
-                      selectedOfferings.includes(offering.title)
-                        ? 'bg-blue-600 border-blue-600'
-                        : 'border-gray-300 bg-white'
-                    }`}>
-                      {selectedOfferings.includes(offering.title) && (
-                        <Check className="w-3 h-3 text-white" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="text-sm font-medium text-gray-900">{offering.title}</p>
-                        {offering.price > 0 && (
-                          <span className="text-xs font-medium text-blue-600">+RM {offering.price}</span>
-                        )}
+            {/* Additional Offerings Card - Collapsible */}
+            <div className="bg-white rounded-lg border border-gray-200">
+              <button
+                type="button"
+                onClick={() => setShowOfferings(!showOfferings)}
+                className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition"
+              >
+                <div className="flex items-center gap-2">
+                  <h2 className="text-base font-semibold text-gray-900">Additional Offerings</h2>
+                  {selectedOfferings.length > 0 && (
+                    <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full">
+                      {selectedOfferings.length} selected
+                    </span>
+                  )}
+                </div>
+                <ChevronDown className={`w-5 h-5 text-gray-500 transition-transform ${showOfferings ? 'rotate-180' : ''}`} />
+              </button>
+              {showOfferings && (
+                <div className="px-4 pb-4 border-t border-gray-100">
+                  <p className="text-xs text-gray-500 py-2">Select the add-ons to offer with this service</p>
+                  <div className="space-y-1.5 max-h-60 overflow-y-auto">
+                    {AVAILABLE_OFFERINGS.map((offering, index) => (
+                      <div
+                        key={index}
+                        onClick={() => toggleOffering(offering.title)}
+                        className={`flex items-start gap-2 p-2 rounded-md cursor-pointer transition ${
+                          selectedOfferings.includes(offering.title)
+                            ? 'bg-blue-50 border border-blue-200'
+                            : 'bg-gray-50 border border-transparent hover:bg-gray-100'
+                        }`}
+                      >
+                        <div className={`w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center mt-0.5 ${
+                          selectedOfferings.includes(offering.title)
+                            ? 'bg-blue-600 border-blue-600'
+                            : 'border-gray-300 bg-white'
+                        }`}>
+                          {selectedOfferings.includes(offering.title) && (
+                            <Check className="w-2.5 h-2.5 text-white" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-xs font-medium text-gray-900">{offering.title}</p>
+                            {offering.price > 0 && (
+                              <span className="text-[10px] font-medium text-blue-600">+RM {offering.price}</span>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-gray-500 mt-0.5 line-clamp-1">{offering.description}</p>
+                        </div>
                       </div>
-                      <p className="text-xs text-gray-500 mt-0.5">{offering.description}</p>
-                    </div>
+                    ))}
                   </div>
-                ))}
+                </div>
+              )}
+            </div>
               </div>
             </div>
 
-            {/* Service Images Card */}
-            <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">Service Images</h2>
-              <p className="text-xs text-gray-500 mb-3">
+            {/* Service Images Card - Compact */}
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <h2 className="text-base font-semibold text-gray-900 mb-1">Service Images</h2>
+              <p className="text-[10px] text-gray-500 mb-2">
                 Upload up to 3 images to showcase the service
               </p>
               
-              {/* Image Grid - 3 slots */}
-              <div className="grid grid-cols-3 gap-3">
+              {/* Image Grid - 3 slots compact */}
+              <div className="grid grid-cols-3 gap-2">
                 {[0, 1, 2].map((index) => {
                   const image = images[index];
                   return (
-                    <div key={index} className="relative aspect-square">
+                    <div key={index} className="relative aspect-[4/3]">
                       {image ? (
                         <div className="relative w-full h-full group">
                           <img
                             src={image.url}
                             alt={`Service ${index + 1}`}
-                            className="w-full h-full object-cover rounded-lg border border-gray-200"
+                            className="w-full h-full object-cover rounded-md border border-gray-200"
                           />
-                          <span className="absolute top-1 left-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded">
-                            {index === 0 ? '1st' : index === 1 ? '2nd' : '3rd'}
+                          <span className="absolute top-0.5 left-0.5 bg-black/60 text-white text-[8px] px-1 py-0.5 rounded">
+                            {index + 1}
                           </span>
                           <button
                             type="button"
                             onClick={() => handleRemoveImage(index)}
-                            className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="absolute top-0.5 right-0.5 p-0.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                           >
-                            <X className="w-3 h-3" />
+                            <X className="w-2.5 h-2.5" />
                           </button>
                         </div>
                       ) : (
-                        <label className={`w-full h-full border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 transition ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                        <label className={`w-full h-full border-2 border-dashed border-gray-300 rounded-md flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 transition ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
                           <input
                             type="file"
                             accept="image/jpeg,image/png,image/gif,image/webp"
@@ -505,15 +526,12 @@ export default function CreateSpecialistPage() {
                             disabled={uploading}
                             className="hidden"
                           />
-                          <span className="text-[10px] text-gray-500 mb-1">
-                            Image ({index === 0 ? '1st' : index === 1 ? '2nd' : '3rd'})
-                          </span>
                           {uploading && images.length === index ? (
-                            <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+                            <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
                           ) : (
                             <>
-                              <Upload className="w-6 h-6 text-gray-400" />
-                              <span className="text-xs text-gray-500 mt-1">Upload</span>
+                              <Upload className="w-4 h-4 text-gray-400" />
+                              <span className="text-[10px] text-gray-500 mt-0.5">{index + 1}</span>
                             </>
                           )}
                         </label>
