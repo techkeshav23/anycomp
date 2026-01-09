@@ -33,6 +33,7 @@ interface Specialist {
   supported_company_types?: string[];
   serviceOfferings?: ServiceOffering[];
   media?: { id: string; file_name: string; display_order: number }[];
+  user?: { id: string; name: string; email: string };
   created_at: string;
   updated_at: string;
 }
