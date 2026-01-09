@@ -58,7 +58,12 @@ export default function SpecialistDetailPage() {
 
   const fetchSpecialist = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/specialists/${params.id}`);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_URL}/api/specialists/${params.id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       const data = await response.json();
 
       if (data.success) {

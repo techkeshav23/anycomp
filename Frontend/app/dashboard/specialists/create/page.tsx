@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, X, Upload, Loader2, Check, Plus } from 'lucide-react';
@@ -17,6 +17,14 @@ interface UploadedImage {
   url: string;
   file_name?: string;
   isNew?: boolean;
+}
+
+interface PlatformFeeTier {
+  id: string;
+  tier_name: string;
+  min_value: number;
+  max_value: number | null;
+  platform_fee_percentage: number;
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -63,6 +71,7 @@ export default function CreateSpecialistPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [platformFees, setPlatformFees] = useState<PlatformFeeTier[]>([]);
   
   const [formData, setFormData] = useState({
     title: '',
@@ -76,6 +85,44 @@ export default function CreateSpecialistPage() {
   const [selectedOfferings, setSelectedOfferings] = useState<string[]>([]);
   const [images, setImages] = useState<UploadedImage[]>([]);
   const [tempSpecialistId, setTempSpecialistId] = useState<string | null>(null);
+
+  // Fetch platform fees on mount
+  useEffect(() => {
+    const fetchPlatformFees = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/specialists/platform-fees/all`);
+        const data = await response.json();
+        if (data.success) {
+          setPlatformFees(data.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch platform fees:', error);
+      }
+    };
+    fetchPlatformFees();
+  }, []);
+
+  // Calculate platform fee based on tiers
+  const calculatePlatformFee = (basePrice: number): { percentage: number; fee: number } => {
+    if (platformFees.length === 0) {
+      return { percentage: 0, fee: 0 };
+    }
+
+    // Find the matching tier
+    const tier = platformFees.find(t => {
+      const minMatch = basePrice >= t.min_value;
+      const maxMatch = t.max_value === null || basePrice <= t.max_value;
+      return minMatch && maxMatch;
+    });
+
+    if (tier) {
+      const percentage = Number(tier.platform_fee_percentage);
+      const fee = (basePrice * percentage) / 100;
+      return { percentage, fee };
+    }
+
+    return { percentage: 0, fee: 0 };
+  };
 
   // Upload image handler
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -234,10 +281,9 @@ export default function CreateSpecialistPage() {
     }
   };
 
-  // Calculate price display
+  // Calculate price display using actual platform fees
   const basePrice = Number(formData.base_price || 0);
-  const platformFeePercent = 10; // Example fee percentage
-  const platformFee = Math.round(basePrice * platformFeePercent / 100);
+  const { percentage: platformFeePercent, fee: platformFee } = calculatePlatformFee(basePrice);
   const totalPrice = basePrice + platformFee;
 
   return (
@@ -496,7 +542,9 @@ export default function CreateSpecialistPage() {
                   <span className="font-medium">RM {basePrice.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 underline decoration-dotted cursor-help">Service processing fee</span>
+                  <span className="text-gray-600 underline decoration-dotted cursor-help" title={`Platform fee: ${platformFeePercent}%`}>
+                    Service processing fee ({platformFeePercent}%)
+                  </span>
                   <span className="font-medium">RM {platformFee.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between pt-3 border-t border-gray-200">
