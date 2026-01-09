@@ -439,36 +439,36 @@ export default function EditServiceModal({ specialist, onClose, onSave }: EditSe
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Service Images
             </label>
-            <p className="text-xs text-gray-500 mb-3">
+            <p className="text-xs text-gray-500 mb-2">
               Upload up to 3 images to showcase your service
             </p>
             
-            {/* Image Grid - 3 slots */}
-            <div className="grid grid-cols-3 gap-3">
+            {/* Image Grid - 3 slots, compact */}
+            <div className="grid grid-cols-3 gap-2">
               {[0, 1, 2].map((index) => {
                 const image = images[index];
                 return (
-                  <div key={index} className="relative aspect-square">
+                  <div key={index} className="relative aspect-[4/3]">
                     {image ? (
                       <div className="relative w-full h-full group">
                         <img
                           src={image.url}
                           alt={`Service ${index + 1}`}
-                          className="w-full h-full object-cover rounded-lg border border-gray-200"
+                          className="w-full h-full object-cover rounded-md border border-gray-200"
                         />
-                        <span className="absolute top-1 left-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded">
+                        <span className="absolute top-0.5 left-0.5 bg-black/60 text-white text-[8px] px-1 py-0.5 rounded">
                           {index === 0 ? '1st' : index === 1 ? '2nd' : '3rd'}
                         </span>
                         <button
                           type="button"
                           onClick={() => handleRemoveImage(index)}
-                          className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute top-0.5 right-0.5 p-0.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                         >
-                          <X className="w-3 h-3" />
+                          <X className="w-2.5 h-2.5" />
                         </button>
                       </div>
                     ) : (
-                      <label className={`w-full h-full border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 transition ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                      <label className={`w-full h-full border-2 border-dashed border-gray-300 rounded-md flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 transition ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
                         <input
                           type="file"
                           accept="image/jpeg,image/png,image/gif,image/webp"
@@ -476,15 +476,15 @@ export default function EditServiceModal({ specialist, onClose, onSave }: EditSe
                           disabled={uploading}
                           className="hidden"
                         />
-                        <span className="text-[10px] text-gray-500 mb-1">
-                          Service - Image ({index === 0 ? '1st' : index === 1 ? '2nd' : '3rd'})
+                        <span className="text-[8px] text-gray-500 mb-0.5">
+                          Image {index + 1}
                         </span>
                         {uploading && images.length === index ? (
-                          <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+                          <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
                         ) : (
                           <>
-                            <Upload className="w-6 h-6 text-gray-400" />
-                            <span className="text-xs text-gray-500 mt-1">Upload</span>
+                            <Upload className="w-4 h-4 text-gray-400" />
+                            <span className="text-[10px] text-gray-500 mt-0.5">Upload</span>
                           </>
                         )}
                       </label>
