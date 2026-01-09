@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Upload, CheckCircle, Shield } from 'lucide-react';
+import { Upload, CheckCircle, Shield, Loader2 } from 'lucide-react';
 import EditServiceModal from '@/components/dashboard/EditServiceModal';
 
 interface ServiceOffering {
@@ -39,6 +39,7 @@ export default function ServicesPage() {
   const router = useRouter();
   const [specialist, setSpecialist] = useState<Specialist | null>(null);
   const [loading, setLoading] = useState(true);
+  const [publishing, setPublishing] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [user, setUser] = useState<any>(null);
 
@@ -107,8 +108,12 @@ export default function ServicesPage() {
   };
 
   const handlePublish = async () => {
-    if (!specialist) return;
+    if (!specialist || publishing) return;
 
+    // Toggle: if currently draft -> publish (is_draft: false), if published -> unpublish (is_draft: true)
+    const newDraftStatus = !specialist.is_draft;
+
+    setPublishing(true);
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(`${API_URL}/api/specialists/me/publish`, {
@@ -117,7 +122,7 @@ export default function ServicesPage() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ is_draft: false }),
+        body: JSON.stringify({ is_draft: newDraftStatus }),
       });
 
       const data = await response.json();
@@ -125,11 +130,13 @@ export default function ServicesPage() {
       if (data.success) {
         fetchMyService();
       } else {
-        alert(data.message || 'Failed to publish service');
+        alert(data.message || 'Failed to update service status');
       }
     } catch (error) {
-      console.error('Failed to publish service:', error);
-      alert('Failed to publish service');
+      console.error('Failed to update service status:', error);
+      alert('Failed to update service status');
+    } finally {
+      setPublishing(false);
     }
   };
 
@@ -190,30 +197,46 @@ export default function ServicesPage() {
         <div className="flex gap-2">
           <button
             onClick={() => setShowEditModal(true)}
-            className="flex-1 sm:flex-initial px-4 sm:px-5 py-2 border border-blue-900 text-blue-900 rounded-md text-sm font-medium hover:bg-blue-50 transition"
+            className="flex-1 sm:flex-initial px-4 sm:px-5 py-2 border border-blue-900 text-blue-900 rounded-md text-sm font-medium hover:bg-blue-50 active:scale-95 active:bg-blue-100 transition-all duration-150"
           >
             Edit
           </button>
           {currentSpecialist.is_draft ? (
             <button
               onClick={handlePublish}
-              className="flex-1 sm:flex-initial px-4 sm:px-5 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 transition"
+              disabled={publishing}
+              className="flex-1 sm:flex-initial px-4 sm:px-5 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 active:scale-95 active:bg-green-800 disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-150 flex items-center justify-center gap-2"
             >
-              Submit for Approval
+              {publishing ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                'Submit for Approval'
+              )}
             </button>
           ) : currentSpecialist.verification_status === 'under_review' ? (
             <button
               disabled
-              className="flex-1 sm:flex-initial px-4 sm:px-5 py-2 bg-yellow-500 text-white rounded-md text-sm font-medium cursor-not-allowed"
+              className="flex-1 sm:flex-initial px-4 sm:px-5 py-2 bg-yellow-500 text-white rounded-md text-sm font-medium cursor-not-allowed opacity-80"
             >
               Awaiting Approval
             </button>
           ) : (
             <button
               onClick={handlePublish}
-              className="flex-1 sm:flex-initial px-4 sm:px-5 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 transition"
+              disabled={publishing}
+              className="flex-1 sm:flex-initial px-4 sm:px-5 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 active:scale-95 active:bg-red-800 disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-150 flex items-center justify-center gap-2"
             >
-              Unpublish
+              {publishing ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Unpublishing...
+                </>
+              ) : (
+                'Unpublish'
+              )}
             </button>
           )}
         </div>
