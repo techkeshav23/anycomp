@@ -188,29 +188,66 @@ export default function SpecialistDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Image Upload Area */}
+          {/* Image Gallery */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="aspect-video bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center">
-              <Upload className="w-8 h-8 text-gray-400 mb-2" />
-              <p className="text-sm text-gray-500">Upload an image for your service listing in PNG, JPG or JPEG</p>
-              <p className="text-xs text-gray-400">up to 4MB</p>
+            {/* Main Image */}
+            <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+              {specialist.media && specialist.media.length > 0 ? (
+                <img
+                  src={specialist.media[0].file_name}
+                  alt={specialist.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full border-2 border-dashed border-gray-300 flex flex-col items-center justify-center">
+                  <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                  <p className="text-sm text-gray-500">Upload an image for your service listing in PNG, JPG or JPEG</p>
+                  <p className="text-xs text-gray-400">up to 4MB</p>
+                </div>
+              )}
             </div>
+            {/* Secondary Images */}
             <div className="grid grid-rows-2 gap-4">
-              <div className="bg-blue-800 rounded-lg flex items-center justify-center text-white p-4">
-                <div className="text-center">
-                  <div className="text-xl font-bold">10 Best Company</div>
-                  <div className="text-lg">Secretarial in</div>
-                  <div className="text-lg">Johor Bahru</div>
-                </div>
-              </div>
-              <div className="bg-gray-200 rounded-lg flex items-center justify-center p-4">
-                <div className="text-center text-gray-700 text-sm">
-                  <p className="font-semibold">A Company Secretary</p>
-                  <p>Represents a Key Role</p>
-                  <p>in Any Business.</p>
-                  <p>This is Why</p>
-                </div>
-              </div>
+              {specialist.media && specialist.media.length > 1 ? (
+                <>
+                  <div className="rounded-lg overflow-hidden bg-gray-100">
+                    <img
+                      src={specialist.media[1]?.file_name}
+                      alt="Service image 2"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  {specialist.media.length > 2 ? (
+                    <div className="rounded-lg overflow-hidden bg-gray-100">
+                      <img
+                        src={specialist.media[2]?.file_name}
+                        alt="Service image 3"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="bg-gray-200 rounded-lg flex items-center justify-center p-4">
+                      <div className="text-center text-gray-500 text-sm">
+                        <p>No additional image</p>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <div className="bg-blue-800 rounded-lg flex items-center justify-center text-white p-4">
+                    <div className="text-center">
+                      <div className="text-lg font-bold">{specialist.title}</div>
+                    </div>
+                  </div>
+                  <div className="bg-gray-200 rounded-lg flex items-center justify-center p-4">
+                    <div className="text-center text-gray-700 text-sm">
+                      <p className="font-semibold">Professional Service</p>
+                      <p>{specialist.duration_days} day{specialist.duration_days !== 1 ? 's' : ''} completion</p>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -218,52 +255,55 @@ export default function SpecialistDetailPage() {
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Description</h2>
             <p className="text-gray-500 text-sm">
-              {specialist.description || 'Describe your service here'}
+              {specialist.description || 'No description provided'}
             </p>
           </div>
 
           {/* Additional Offerings */}
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Additional Offerings</h2>
-            <p className="text-gray-500 text-sm mb-4">
-              Enhance your service by adding additional offerings
-            </p>
             {specialist.serviceOfferings && specialist.serviceOfferings.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {specialist.serviceOfferings.map((offering, index) => (
                   <span
                     key={offering.id || index}
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 rounded-full text-sm"
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
                   >
-                    {offering.title || offering.name} - RM {offering.price}
+                    {offering.title || offering.name}
+                    {offering.price && offering.price > 0 ? ` - RM ${offering.price}` : ''}
                   </span>
                 ))}
               </div>
             ) : (
-              <p className="text-gray-400 text-sm italic">No additional offerings added</p>
+              <p className="text-gray-400 text-sm italic">No additional offerings</p>
             )}
           </div>
 
-          {/* Company Secretary */}
+          {/* Specialist Info */}
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Company Secretary</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Specialist Information</h2>
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 rounded-full bg-blue-900 flex items-center justify-center text-white font-semibold">
-                GL
+                {specialist.user?.name?.charAt(0).toUpperCase() || specialist.title.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-gray-900">Grace Lam</span>
-                  <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded">Verified</span>
+                  <span className="font-medium text-gray-900">{specialist.user?.name || 'Specialist'}</span>
+                  {specialist.is_verified && (
+                    <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded">Verified</span>
+                  )}
                 </div>
-                <p className="text-sm text-gray-500">Corpse Services Sdn Bhd</p>
-                <p className="text-xs text-gray-400">350 Clients • 4.5</p>
+                <p className="text-sm text-gray-500">{specialist.user?.email || ''}</p>
+                <div className="flex items-center gap-4 mt-1">
+                  <span className="text-xs text-gray-400">
+                    Rating: {specialist.average_rating || 0} ({specialist.total_number_of_ratings || 0} reviews)
+                  </span>
+                  <span className="text-xs text-gray-400">
+                    Duration: {specialist.duration_days} day{specialist.duration_days !== 1 ? 's' : ''}
+                  </span>
+                </div>
                 <p className="text-sm text-gray-600 mt-2 leading-relaxed">
-                  A company secretarial service founded by Grace, who believes that every
-                  company deserves clarity, confidence, and care in their compliance journey.
-                  Inspired by the spirit of entrepreneurship, Asta treats every client's business as if
-                  it were her own – attentive to detail, committed to deadlines, and focused on
-                  building trust with every document filed.
+                  {specialist.description || 'Professional service provider specializing in company secretarial services.'}
                 </p>
               </div>
             </div>
