@@ -1,7 +1,7 @@
 import { Response, NextFunction } from 'express';
 import { AppDataSource } from '../data-source';
 import { Specialist, ServiceOffering, PlatformFee, Media, User } from '../entity';
-import { AuthRequest, ISpecialist, IPlatformFee, IMedia, VerificationStatus, PriceCalculation, IServiceOffering } from '../types';
+import { AuthRequest, ISpecialist, IPlatformFee, IMedia, VerificationStatus, PriceCalculation, IServiceOffering, IUser } from '../types';
 
 // Get repositories
 const getSpecialistRepository = () => AppDataSource.getRepository(Specialist);
@@ -549,6 +549,124 @@ export const publishMyProfile = async (
 };
 
 // ==================== ADMIN FUNCTIONS ====================
+
+// @desc    Create a new specialist (Admin creates specialist with a new user)
+// @route   POST /api/specialists
+// @access  Private (Admin only)
+export const createSpecialist = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { title, description, base_price, duration_days, name, email, password, serviceOfferings } = req.body;
+
+    if (!title) {
+      res.status(400).json({
+        success: false,
+        message: 'Title is required',
+      });
+      return;
+    }
+
+    // Check if we're creating with a new user or just the specialist profile
+    const specialistRepository = getSpecialistRepository();
+    const userRepository = getUserRepository();
+    const serviceOfferingRepository = getServiceOfferingRepository();
+
+    let userId: string;
+
+    // If email is provided, create a new user for this specialist
+    if (email) {
+      // Check if user with this email already exists
+      const existingUser = await userRepository.findOne({ where: { email } });
+      if (existingUser) {
+        res.status(400).json({
+          success: false,
+          message: 'A user with this email already exists',
+        });
+        return;
+      }
+
+      // Hash password
+      const bcrypt = require('bcryptjs');
+      const hashedPassword = await bcrypt.hash(password || 'defaultPassword123', 12);
+
+      // Create new user
+      const newUser = userRepository.create({
+        name: name || title,
+        email,
+        password: hashedPassword,
+        role: 'specialist',
+      });
+      await userRepository.save(newUser);
+      userId = (newUser as IUser).id;
+    } else {
+      // Generate a placeholder user for this specialist
+      const bcrypt = require('bcryptjs');
+      const placeholderEmail = `specialist-${Date.now()}@placeholder.local`;
+      const hashedPassword = await bcrypt.hash('placeholder123', 12);
+
+      const newUser = userRepository.create({
+        name: name || title,
+        email: placeholderEmail,
+        password: hashedPassword,
+        role: 'specialist',
+      });
+      await userRepository.save(newUser);
+      userId = (newUser as IUser).id;
+    }
+
+    // Calculate pricing
+    const priceData = await calculateFinalPrice(parseFloat(String(base_price)) || 0);
+
+    // Create specialist profile
+    const slug = generateSlug(title, userId as unknown as number);
+
+    const specialist = specialistRepository.create({
+      id: userId,
+      title,
+      slug,
+      description: description || null,
+      base_price: parseFloat(String(base_price)) || 0,
+      platform_fee: priceData.platform_fee,
+      final_price: priceData.final_price,
+      duration_days: duration_days || 1,
+      is_draft: true,
+      verification_status: 'pending',
+    } as Partial<ISpecialist>);
+
+    await specialistRepository.save(specialist);
+
+    // Add service offerings if provided
+    if (serviceOfferings && Array.isArray(serviceOfferings)) {
+      for (const offering of serviceOfferings) {
+        if (offering.name && offering.price > 0) {
+          const serviceOffering = serviceOfferingRepository.create({
+            name: offering.name,
+            price: parseFloat(String(offering.price)),
+            specialist: { id: userId },
+          } as Partial<IServiceOffering>);
+          await serviceOfferingRepository.save(serviceOffering);
+        }
+      }
+    }
+
+    // Fetch the complete specialist with relations
+    const completeSpecialist = await specialistRepository.findOne({
+      where: { id: userId },
+      relations: ['user', 'serviceOfferings', 'media'],
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Specialist created successfully',
+      data: completeSpecialist,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 // @desc    Publish a specialist (Admin approves - set is_draft = false, verification = approved)
 // @route   PATCH /api/specialists/:id/publish

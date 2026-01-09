@@ -17,6 +17,7 @@ const app: Application = express();
 // Middleware
 const allowedOrigins = [
   'http://localhost:3000',
+  'https://anycomp-two.vercel.app',
   process.env.CLIENT_URL?.replace(/\/$/, ''), // Remove trailing slash if present
 ].filter(Boolean);
 
@@ -29,9 +30,10 @@ app.use(cors({
     const normalizedOrigin = origin.replace(/\/$/, '');
     
     if (allowedOrigins.includes(normalizedOrigin)) {
-      callback(null, origin);
+      // Return the normalized origin (without trailing slash)
+      callback(null, normalizedOrigin);
     } else {
-      callback(null, true); // Allow all origins in development, you can restrict in production
+      callback(null, true); // Allow all origins in development
     }
   },
   credentials: true,

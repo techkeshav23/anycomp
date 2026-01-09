@@ -9,6 +9,7 @@ import {
   deleteMyServiceOffering,
   submitForReview,
   publishMyProfile,
+  createSpecialist,
   publishSpecialist,
   unpublishSpecialist,
   deleteSpecialist,
@@ -54,6 +55,8 @@ router.get('/:id', optionalAuth, getSpecialistById);
 // ============================================
 // ADMIN ONLY ROUTES (Full control over all specialists)
 // ============================================
+// Create a new specialist (admin)
+router.post('/', protect, authorize('admin'), createSpecialist);
 // Publish/Approve a specialist
 router.patch('/:id/publish', protect, authorize('admin'), publishSpecialist);
 // Unpublish a specialist

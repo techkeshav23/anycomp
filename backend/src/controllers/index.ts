@@ -2,7 +2,7 @@ export { signup, login, getMe } from './authController';
 export {
   getAllSpecialists,
   getSpecialistById,
-  saveSpecialist,
+  createSpecialist,
   publishSpecialist,
   unpublishSpecialist,
   deleteSpecialist,
