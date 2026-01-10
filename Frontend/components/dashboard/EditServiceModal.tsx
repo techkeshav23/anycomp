@@ -97,7 +97,13 @@ const OFFERING_ICONS: { [key: string]: any } = {
 };
 
 export default function EditServiceModal({ specialist, onClose, onSave }: EditServiceModalProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    description: string;
+    base_price: string | number;
+    duration_days: number;
+    service_category: string;
+  }>({
     title: specialist.title || '',
     description: specialist.description || '',
     base_price: specialist.base_price || 0,
@@ -267,8 +273,13 @@ export default function EditServiceModal({ specialist, onClose, onSave }: EditSe
     setLoading(true);
 
     try {
+      // Ensure precise rounding for price to avoid floating point issues (e.g. 17999.9700002)
+      const rawPrice = typeof formData.base_price === 'string' ? parseFloat(formData.base_price) : formData.base_price;
+      const roundedPrice = Math.round((rawPrice + Number.EPSILON) * 100) / 100;
+
       await onSave({
         ...formData,
+        base_price: roundedPrice || 0,
         supported_company_types: selectedCompanyTypes,
         serviceOfferings: selectedOfferings.map(title => {
           const offering = AVAILABLE_OFFERINGS.find(o => o.title === title);
@@ -370,8 +381,15 @@ export default function EditServiceModal({ specialist, onClose, onSave }: EditSe
                 min="0"
                 step="0.01"
                 placeholder="0.00"
-                value={formData.base_price || ''}
-                onChange={(e) => setFormData({ ...formData, base_price: parseFloat(e.target.value) || 0 })}
+                value={formData.base_price}
+                onChange={(e) => setFormData({ ...formData, base_price: e.target.value })}
+                onBlur={() => {
+                   // Optional: format on blur if needed, or leave as is
+                   const val = parseFloat(formData.base_price.toString());
+                   if (!isNaN(val)) {
+                      setFormData({ ...formData, base_price: val });
+                   }
+                }}
                 className="w-full pl-20 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               />
             </div>
