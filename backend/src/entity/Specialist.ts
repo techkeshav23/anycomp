@@ -8,9 +8,9 @@ const Specialist = new EntitySchema<ISpecialist>({
     id: {
       type: 'uuid',
       primary: true,
-      // NOT generated - uses same id as users table (shared PK)
+      generated: 'uuid',
     },
-    // Service info (same as original image schema)
+    // Service info (same as boss's schema)
     title: {
       type: 'varchar',
       length: 255,
@@ -91,17 +91,7 @@ const Specialist = new EntitySchema<ISpecialist>({
     },
   },
   relations: {
-    // 1:1 relationship with User (shared primary key)
-    user: {
-      type: 'one-to-one',
-      target: 'User',
-      joinColumn: {
-        name: 'id', // specialists.id = users.id
-        referencedColumnName: 'id',
-      },
-      inverseSide: 'specialist',
-      onDelete: 'CASCADE',
-    },
+    // No user relation - standalone entity managed by admin
     media: {
       type: 'one-to-many',
       target: 'Media',

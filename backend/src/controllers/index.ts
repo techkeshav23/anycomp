@@ -1,4 +1,4 @@
-export { signup, login, getMe } from './authController';
+export { login, getMe } from './authController';
 export {
   getAllSpecialists,
   getSpecialistById,
@@ -7,8 +7,11 @@ export {
   publishSpecialist,
   unpublishSpecialist,
   deleteSpecialist,
-  deleteServiceOffering,
   verifySpecialist,
+  getMasterServices,
+  createMasterService,
+  updateMasterService,
+  deleteMasterService,
   getPlatformFees,
   savePlatformFee,
 } from './specialistController';

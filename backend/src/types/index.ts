@@ -1,7 +1,7 @@
 import { Request } from 'express';
 
-// User roles - specialist is a service provider
-export type UserRole = 'specialist' | 'admin';
+// User roles - only admin (from .env, no DB table)
+export type UserRole = 'admin';
 
 // Verification status
 export type VerificationStatus = 'pending' | 'approved' | 'under_review' | 'rejected';
@@ -13,24 +13,17 @@ export type TierName = 'basic' | 'standard' | 'premium' | 'enterprise';
 export type MediaType = 'image' | 'video' | 'document' | 'thumbnail';
 export type MimeType = 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' | 'application/pdf' | 'video/mp4';
 
-// User interface (Authentication)
-export interface IUser {
-  id: string;
-  name: string;
+// Admin user (from .env - no DB table)
+export interface IAdmin {
   email: string;
-  password: string;
-  phone: string | null;
+  name: string;
   role: UserRole;
-  createdAt: Date;
-  updatedAt: Date;
-  // 1:1 relation with specialist
-  specialist?: ISpecialist;
 }
 
-// Specialist interface (Service Provider Profile - 1:1 with User, shared PK)
+// Specialist interface (Service Listing - managed by Admin)
 export interface ISpecialist {
-  id: string; // Same as users.id (shared primary key)
-  // Service info (same as original schema)
+  id: string; // Auto-generated UUID
+  // Service info (same as boss's schema)
   title: string;
   slug: string | null;
   description: string | null;
@@ -51,18 +44,30 @@ export interface ISpecialist {
   updated_at: Date;
   deleted_at: Date | null;
   // Relations
-  user?: IUser;
   media?: IMedia[];
   serviceOfferings?: IServiceOffering[];
 }
 
-// Service offering interface (Additional offerings - same as original schema)
+// Service Offerings Master List (Predefined services catalog)
+export interface IServiceOfferingsMasterList {
+  id: string;
+  title: string;
+  description: string | null;
+  s3_key: string | null;
+  bucket_name: string | null;
+  created_at: Date;
+  updated_at: Date;
+}
+
+// Service offering interface (Junction table - links specialists to master services)
 export interface IServiceOffering {
   id: string;
-  specialists: string;
+  specialists: string; // FK to specialists
+  service_offerings_master_list_id: string; // FK to master list
   created_at: Date;
   updated_at: Date;
   specialist?: ISpecialist;
+  masterService?: IServiceOfferingsMasterList;
 }
 
 // Platform fee interface
@@ -92,15 +97,15 @@ export interface IMedia {
   specialist?: ISpecialist;
 }
 
-// JWT payload interface
+// JWT payload interface (email-based, no user id)
 export interface JwtPayload {
-  id: string;
+  email: string;
   role: UserRole;
 }
 
-// Extended Request interface with user
+// Extended Request interface with admin
 export interface AuthRequest extends Request {
-  user?: IUser;
+  user?: IAdmin;
 }
 
 // API Response interfaces
@@ -129,16 +134,8 @@ export interface PriceCalculation {
   final_price: number;
 }
 
-// Signup request for specialist
-export interface SpecialistSignupRequest {
-  // User fields
-  name: string;
+// Admin login request
+export interface AdminLoginRequest {
   email: string;
   password: string;
-  phone?: string;
-  // Specialist fields (optional - can be added later)
-  title?: string;
-  description?: string;
-  base_price?: number;
-  duration_days?: number;
 }

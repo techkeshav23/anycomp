@@ -112,14 +112,7 @@ export const uploadMedia = async (
       return;
     }
 
-    // Check permission: must be owner or admin
-    if (req.user?.role !== 'admin' && req.user?.id !== specialist.id) {
-      res.status(403).json({
-        success: false,
-        message: 'Not authorized to upload media for this specialist',
-      });
-      return;
-    }
+    // Only admin can upload (no owner check - specialists don't have accounts)
 
     // Upload to Cloudinary
     const uploadResult = await uploadToCloudinary(
@@ -194,16 +187,9 @@ export const uploadMultipleMedia = async (
       return;
     }
 
-    // Check permission: must be owner or admin
-    if (req.user?.role !== 'admin' && req.user?.id !== specialist.id) {
-      res.status(403).json({
-        success: false,
-        message: 'Not authorized to upload media for this specialist',
-      });
-      return;
-    }
+    // Only admin can upload (no owner check - specialists don't have accounts)
 
-    const mediaRepository = getMediaRepository();
+    const mediaRepository = getMediaRepository()
     let currentOrder = await mediaRepository.count({
       where: { specialists: specialistId },
     });
@@ -305,14 +291,7 @@ export const deleteMedia = async (
       return;
     }
 
-    // Check permission: must be owner or admin
-    if (req.user?.role !== 'admin' && req.user?.id !== media.specialists) {
-      res.status(403).json({
-        success: false,
-        message: 'Not authorized to delete this media',
-      });
-      return;
-    }
+    // Only admin can delete (no owner check - specialists don't have accounts)
 
     // Delete from Cloudinary
     const publicId = getPublicIdFromUrl(media.file_name);
@@ -366,13 +345,7 @@ export const reorderMedia = async (
       return;
     }
 
-    if (req.user?.role !== 'admin' && req.user?.id !== specialist.id) {
-      res.status(403).json({
-        success: false,
-        message: 'Not authorized to reorder media for this specialist',
-      });
-      return;
-    }
+    // Only admin can reorder (no owner check - specialists don't have accounts)
 
     const mediaRepository = getMediaRepository();
 
@@ -452,13 +425,7 @@ export const saveMediaUrl = async (
       return;
     }
 
-    if (req.user?.role !== 'admin' && req.user?.id !== specialist.id) {
-      res.status(403).json({
-        success: false,
-        message: 'Not authorized to add media for this specialist',
-      });
-      return;
-    }
+    // Only admin can add media (no owner check - specialists don't have accounts)
 
     const mediaRepository = getMediaRepository();
     const mediaCount = await mediaRepository.count({

@@ -14,6 +14,10 @@ const ServiceOffering = new EntitySchema<IServiceOffering>({
       type: 'uuid',
       nullable: false,
     },
+    service_offerings_master_list_id: {
+      type: 'uuid',
+      nullable: false,
+    },
     created_at: {
       type: 'timestamp',
       createDate: true,
@@ -32,6 +36,15 @@ const ServiceOffering = new EntitySchema<IServiceOffering>({
         referencedColumnName: 'id',
       },
       inverseSide: 'serviceOfferings',
+      onDelete: 'CASCADE',
+    },
+    masterService: {
+      type: 'many-to-one',
+      target: 'ServiceOfferingsMasterList',
+      joinColumn: {
+        name: 'service_offerings_master_list_id',
+        referencedColumnName: 'id',
+      },
       onDelete: 'CASCADE',
     },
   },

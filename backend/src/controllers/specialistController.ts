@@ -1,17 +1,17 @@
 import { Response, NextFunction } from 'express';
 import { AppDataSource } from '../data-source';
-import { Specialist, ServiceOffering, PlatformFee, Media, User } from '../entity';
-import { AuthRequest, ISpecialist, IPlatformFee, IMedia, VerificationStatus, PriceCalculation, IServiceOffering, IUser } from '../types';
+import { Specialist, ServiceOffering, ServiceOfferingsMasterList, PlatformFee, Media } from '../entity';
+import { AuthRequest, ISpecialist, IPlatformFee, VerificationStatus, PriceCalculation, IServiceOffering, IServiceOfferingsMasterList } from '../types';
 
 // Get repositories
 const getSpecialistRepository = () => AppDataSource.getRepository(Specialist);
 const getServiceOfferingRepository = () => AppDataSource.getRepository(ServiceOffering);
+const getMasterListRepository = () => AppDataSource.getRepository(ServiceOfferingsMasterList);
 const getPlatformFeeRepository = () => AppDataSource.getRepository(PlatformFee);
 const getMediaRepository = () => AppDataSource.getRepository(Media);
-const getUserRepository = () => AppDataSource.getRepository(User);
 
 // Helper function to generate slug from title
-const generateSlug = (title: string, id: number): string => {
+const generateSlug = (title: string, id: string): string => {
   return `${title
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
@@ -22,7 +22,6 @@ const generateSlug = (title: string, id: number): string => {
 const calculateFinalPrice = async (basePrice: number): Promise<PriceCalculation> => {
   const platformFeeRepository = getPlatformFeeRepository();
   
-  // Find the appropriate fee tier based on base_price
   const feeTier = await platformFeeRepository
     .createQueryBuilder('pf')
     .where('pf.min_value <= :price', { price: basePrice })
@@ -43,7 +42,9 @@ const calculateFinalPrice = async (basePrice: number): Promise<PriceCalculation>
   };
 };
 
-// @desc    Get all specialists with pagination, filtering, and search (PUBLIC - no login required)
+// ==================== PUBLIC ROUTES ====================
+
+// @desc    Get all specialists with pagination (PUBLIC)
 // @route   GET /api/specialists
 // @access  Public
 export const getAllSpecialists = async (
@@ -72,11 +73,10 @@ export const getAllSpecialists = async (
 
     const specialistRepository = getSpecialistRepository();
 
-    // Build query - join with user to get name, email
     const queryBuilder = specialistRepository
       .createQueryBuilder('specialist')
-      .leftJoinAndSelect('specialist.user', 'user')
       .leftJoinAndSelect('specialist.serviceOfferings', 'serviceOfferings')
+      .leftJoinAndSelect('serviceOfferings.masterService', 'masterService')
       .leftJoinAndSelect('specialist.media', 'media');
 
     // For public users, only show published & approved specialists
@@ -97,12 +97,9 @@ export const getAllSpecialists = async (
       }
     }
 
-    // Search by title or company_name (case-insensitive)
+    // Search by title
     if (search) {
-      queryBuilder.andWhere(
-        '(specialist.title ILIKE :search OR specialist.company_name ILIKE :search)',
-        { search: `%${search}%` }
-      );
+      queryBuilder.andWhere('specialist.title ILIKE :search', { search: `%${search}%` });
     }
 
     // Exclude soft-deleted
@@ -118,10 +115,7 @@ export const getAllSpecialists = async (
     const order = sortOrder.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
     queryBuilder.orderBy(`specialist.${sortField}`, order);
 
-    // Execute query
     const [specialists, total] = await queryBuilder.getManyAndCount();
-
-    // Calculate pagination metadata
     const totalPages = Math.ceil(total / parseInt(limit));
 
     res.status(200).json({
@@ -155,7 +149,7 @@ export const getSpecialistById = async (
 
     const specialist = await specialistRepository.findOne({
       where: { id },
-      relations: ['user', 'serviceOfferings', 'media'],
+      relations: ['serviceOfferings', 'serviceOfferings.masterService', 'media'],
     });
 
     if (!specialist) {
@@ -168,7 +162,7 @@ export const getSpecialistById = async (
 
     // Public users can only see published & approved specialists
     const specialistData = specialist as ISpecialist;
-    if (!req.user || (req.user.role !== 'admin' && req.user.id !== specialistData.id)) {
+    if (!req.user || req.user.role !== 'admin') {
       if (specialistData.is_draft || specialistData.verification_status !== 'approved') {
         res.status(404).json({
           success: false,
@@ -187,370 +181,9 @@ export const getSpecialistById = async (
   }
 };
 
-// @desc    Get my specialist profile (logged-in specialist only)
-// @route   GET /api/specialists/me
-// @access  Private (Specialist)
-export const getMyProfile = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const specialistRepository = getSpecialistRepository();
-
-    const specialist = await specialistRepository.findOne({
-      where: { id: req.user!.id }, // Shared PK: specialist.id = user.id
-      relations: ['user', 'serviceOfferings', 'media'],
-    });
-
-    // Return null if no specialist profile exists yet (user hasn't created their service)
-    res.status(200).json({
-      success: true,
-      data: specialist || null,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-interface UpdateProfileBody {
-  title?: string;
-  description?: string;
-  base_price?: number;
-  duration_days?: number;
-  service_category?: string;
-  supported_company_types?: string[];
-}
-
-// @desc    Create my specialist profile (first time)
-// @route   POST /api/specialists/me
-// @access  Private (Specialist only)
-export const createMyProfile = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const { title, description, base_price, duration_days } = req.body as UpdateProfileBody;
-
-    if (!title) {
-      res.status(400).json({
-        success: false,
-        message: 'Title is required',
-      });
-      return;
-    }
-
-    const specialistRepository = getSpecialistRepository();
-
-    // Check if profile already exists
-    const existingSpecialist = await specialistRepository.findOne({
-      where: { id: req.user!.id },
-    });
-
-    if (existingSpecialist) {
-      res.status(400).json({
-        success: false,
-        message: 'Specialist profile already exists. Use PUT /api/specialists/me to update.',
-      });
-      return;
-    }
-
-    // Calculate pricing
-    const priceData = await calculateFinalPrice(parseFloat(String(base_price)) || 0);
-
-    // Create specialist profile with same ID as user (shared primary key)
-    const slug = generateSlug(title, req.user!.id);
-
-    const specialist = specialistRepository.create({
-      id: req.user!.id, // Shared PK!
-      title,
-      slug,
-      description: description || null,
-      base_price: parseFloat(String(base_price)) || 0,
-      platform_fee: priceData.platform_fee,
-      final_price: priceData.final_price,
-      duration_days: duration_days || 1,
-      is_draft: true,
-      verification_status: 'pending',
-    } as Partial<ISpecialist>);
-
-    await specialistRepository.save(specialist);
-
-    res.status(201).json({
-      success: true,
-      message: 'Specialist profile created successfully',
-      data: specialist,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// @desc    Update my specialist profile
-// @route   PUT /api/specialists/me
-// @access  Private (Specialist only - can only update own profile)
-export const updateMyProfile = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const {
-      company_name,
-      company_description,
-      certifications,
-      title,
-      description,
-      base_price,
-      duration_days,
-    } = req.body as UpdateProfileBody;
-
-    const specialistRepository = getSpecialistRepository();
-
-    // Find my specialist profile (specialist.id = user.id)
-    let specialist = await specialistRepository.findOne({
-      where: { id: req.user!.id },
-    }) as ISpecialist | null;
-
-    if (!specialist) {
-      // If no profile exists, create one instead of returning 404
-      if (!title) {
-        res.status(400).json({
-          success: false,
-          message: 'Title is required to create specialist profile',
-        });
-        return;
-      }
-
-      const priceData = await calculateFinalPrice(parseFloat(String(base_price)) || 0);
-      const slug = generateSlug(title, req.user!.id);
-
-      specialist = specialistRepository.create({
-        id: req.user!.id,
-        title,
-        slug,
-        description: description || null,
-        base_price: parseFloat(String(base_price)) || 0,
-        platform_fee: priceData.platform_fee,
-        final_price: priceData.final_price,
-        duration_days: duration_days || 1,
-        is_draft: true,
-        verification_status: 'pending',
-      } as Partial<ISpecialist>);
-    } else {
-      // Update existing profile
-      if (title) {
-        specialist.title = title;
-        specialist.slug = generateSlug(title, specialist.id);
-      }
-      if (description !== undefined) specialist.description = description;
-      if (duration_days) specialist.duration_days = duration_days;
-    }
-
-    // Recalculate price if base_price changed
-    if (base_price !== undefined) {
-      const priceData = await calculateFinalPrice(parseFloat(String(base_price)) || 0);
-      specialist.base_price = parseFloat(String(base_price)) || 0;
-      specialist.platform_fee = priceData.platform_fee;
-      specialist.final_price = priceData.final_price;
-    }
-
-    // When profile is updated, reset to pending verification
-    specialist.verification_status = 'pending';
-    specialist.is_verified = false;
-
-    await specialistRepository.save(specialist);
-
-    // Fetch updated profile with relations
-    const updatedSpecialist = await specialistRepository.findOne({
-      where: { id: req.user!.id },
-      relations: ['user', 'serviceOfferings', 'media'],
-    });
-
-    res.status(200).json({
-      success: true,
-      message: 'Profile updated successfully',
-      data: updatedSpecialist,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-interface AddServiceOfferingBody {
-  title: string;
-  description?: string;
-  price?: number;
-}
-
-// @desc    Add a service offering to my profile
-// @route   POST /api/specialists/me/services
-// @access  Private (Specialist only)
-export const addServiceOffering = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const { title, description, price } = req.body as AddServiceOfferingBody;
-
-    if (!title) {
-      res.status(400).json({
-        success: false,
-        message: 'Title is required',
-      });
-      return;
-    }
-
-    const serviceOfferingRepository = getServiceOfferingRepository();
-
-    const offering = serviceOfferingRepository.create({
-      specialists: req.user!.id,
-      title,
-      description: description || null,
-      price: parseFloat(String(price)) || 0,
-    } as Partial<IServiceOffering>);
-
-    await serviceOfferingRepository.save(offering);
-
-    res.status(201).json({
-      success: true,
-      message: 'Service offering added successfully',
-      data: offering,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// @desc    Delete a service offering from my profile
-// @route   DELETE /api/specialists/me/services/:offeringId
-// @access  Private (Specialist only)
-export const deleteMyServiceOffering = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const { offeringId } = req.params;
-    const serviceOfferingRepository = getServiceOfferingRepository();
-
-    const offering = await serviceOfferingRepository.findOne({
-      where: { id: offeringId, specialists: req.user!.id },
-    });
-
-    if (!offering) {
-      res.status(404).json({
-        success: false,
-        message: 'Service offering not found or not owned by you',
-      });
-      return;
-    }
-
-    await serviceOfferingRepository.remove(offering);
-
-    res.status(200).json({
-      success: true,
-      message: 'Service offering deleted successfully',
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// @desc    Submit profile for review (set is_draft = false)
-// @route   PATCH /api/specialists/me/submit
-// @access  Private (Specialist only)
-export const submitForReview = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const specialistRepository = getSpecialistRepository();
-
-    const specialist = await specialistRepository.findOne({
-      where: { id: req.user!.id },
-    }) as ISpecialist | null;
-
-    if (!specialist) {
-      res.status(404).json({
-        success: false,
-        message: 'Specialist profile not found',
-      });
-      return;
-    }
-
-    // Submit for review
-    specialist.is_draft = false;
-    specialist.verification_status = 'under_review';
-    await specialistRepository.save(specialist);
-
-    res.status(200).json({
-      success: true,
-      message: 'Profile submitted for review',
-      data: specialist,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// @desc    Submit for publish (Specialist requests to publish - goes to admin for approval)
-// @route   PATCH /api/specialists/me/publish
-// @access  Private (Specialist only)
-export const publishMyProfile = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const specialistRepository = getSpecialistRepository();
-
-    const specialist = await specialistRepository.findOne({
-      where: { id: req.user!.id },
-    }) as ISpecialist | null;
-
-    if (!specialist) {
-      res.status(404).json({
-        success: false,
-        message: 'Specialist profile not found',
-      });
-      return;
-    }
-
-    if (specialist.is_draft) {
-      // Specialist wants to publish - submit for admin review
-      specialist.is_draft = false;
-      specialist.verification_status = 'under_review';
-      await specialistRepository.save(specialist);
-
-      res.status(200).json({
-        success: true,
-        message: 'Profile submitted for admin approval',
-        data: specialist,
-      });
-    } else {
-      // Specialist wants to unpublish - set back to draft
-      specialist.is_draft = true;
-      specialist.verification_status = 'pending';
-      await specialistRepository.save(specialist);
-
-      res.status(200).json({
-        success: true,
-        message: 'Profile unpublished and set to draft',
-        data: specialist,
-      });
-    }
-  } catch (error) {
-    next(error);
-  }
-};
-
 // ==================== ADMIN FUNCTIONS ====================
 
-// @desc    Create a new specialist (Admin creates specialist with a new user)
+// @desc    Create a new specialist (Admin only)
 // @route   POST /api/specialists
 // @access  Private (Admin only)
 export const createSpecialist = async (
@@ -559,7 +192,7 @@ export const createSpecialist = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { title, description, base_price, duration_days, name, email, password, serviceOfferings } = req.body;
+    const { title, description, base_price, duration_days, serviceOfferingIds } = req.body;
 
     if (!title) {
       res.status(400).json({
@@ -569,64 +202,16 @@ export const createSpecialist = async (
       return;
     }
 
-    // Check if we're creating with a new user or just the specialist profile
     const specialistRepository = getSpecialistRepository();
-    const userRepository = getUserRepository();
     const serviceOfferingRepository = getServiceOfferingRepository();
-
-    let userId: string;
-
-    // If email is provided, create a new user for this specialist
-    if (email) {
-      // Check if user with this email already exists
-      const existingUser = await userRepository.findOne({ where: { email } });
-      if (existingUser) {
-        res.status(400).json({
-          success: false,
-          message: 'A user with this email already exists',
-        });
-        return;
-      }
-
-      // Hash password
-      const bcrypt = require('bcryptjs');
-      const hashedPassword = await bcrypt.hash(password || 'defaultPassword123', 12);
-
-      // Create new user
-      const newUser = userRepository.create({
-        name: name || title,
-        email,
-        password: hashedPassword,
-        role: 'specialist',
-      });
-      await userRepository.save(newUser);
-      userId = (newUser as IUser).id;
-    } else {
-      // Generate a placeholder user for this specialist
-      const bcrypt = require('bcryptjs');
-      const placeholderEmail = `specialist-${Date.now()}@placeholder.local`;
-      const hashedPassword = await bcrypt.hash('placeholder123', 12);
-
-      const newUser = userRepository.create({
-        name: name || title,
-        email: placeholderEmail,
-        password: hashedPassword,
-        role: 'specialist',
-      });
-      await userRepository.save(newUser);
-      userId = (newUser as IUser).id;
-    }
 
     // Calculate pricing
     const priceData = await calculateFinalPrice(parseFloat(String(base_price)) || 0);
 
-    // Create specialist profile
-    const slug = generateSlug(title, userId as unknown as number);
-
+    // Create specialist (no user relation needed)
     const specialist = specialistRepository.create({
-      id: userId,
       title,
-      slug,
+      slug: null,
       description: description || null,
       base_price: parseFloat(String(base_price)) || 0,
       platform_fee: priceData.platform_fee,
@@ -638,24 +223,26 @@ export const createSpecialist = async (
 
     await specialistRepository.save(specialist);
 
-    // Add service offerings if provided
-    if (serviceOfferings && Array.isArray(serviceOfferings)) {
-      for (const offering of serviceOfferings) {
-        if (offering.name && offering.price > 0) {
-          const serviceOffering = serviceOfferingRepository.create({
-            name: offering.name,
-            price: parseFloat(String(offering.price)),
-            specialist: { id: userId },
-          } as Partial<IServiceOffering>);
-          await serviceOfferingRepository.save(serviceOffering);
-        }
+    // Update slug with actual specialist ID
+    const savedSpecialist = specialist as ISpecialist;
+    savedSpecialist.slug = generateSlug(title, savedSpecialist.id);
+    await specialistRepository.save(savedSpecialist);
+
+    // Add service offerings if provided (array of master_list IDs)
+    if (serviceOfferingIds && Array.isArray(serviceOfferingIds)) {
+      for (const masterListId of serviceOfferingIds) {
+        const serviceOffering = serviceOfferingRepository.create({
+          specialists: savedSpecialist.id,
+          service_offerings_master_list_id: masterListId,
+        } as Partial<IServiceOffering>);
+        await serviceOfferingRepository.save(serviceOffering);
       }
     }
 
-    // Fetch the complete specialist with relations
+    // Fetch complete specialist with relations
     const completeSpecialist = await specialistRepository.findOne({
-      where: { id: userId },
-      relations: ['user', 'serviceOfferings', 'media'],
+      where: { id: savedSpecialist.id },
+      relations: ['serviceOfferings', 'serviceOfferings.masterService', 'media'],
     });
 
     res.status(201).json({
@@ -668,7 +255,7 @@ export const createSpecialist = async (
   }
 };
 
-// @desc    Update a specialist (Admin can update any specialist)
+// @desc    Update a specialist (Admin only)
 // @route   PUT /api/specialists/:id
 // @access  Private (Admin only)
 export const updateSpecialist = async (
@@ -678,20 +265,11 @@ export const updateSpecialist = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const {
-      title,
-      description,
-      base_price,
-      duration_days,
-      service_category,
-      supported_company_types,
-      serviceOfferings,
-    } = req.body;
+    const { title, description, base_price, duration_days, serviceOfferingIds } = req.body;
 
     const specialistRepository = getSpecialistRepository();
     const serviceOfferingRepository = getServiceOfferingRepository();
 
-    // Find the specialist
     const specialist = await specialistRepository.findOne({
       where: { id },
       relations: ['serviceOfferings'],
@@ -724,30 +302,26 @@ export const updateSpecialist = async (
     await specialistRepository.save(specialist);
 
     // Update service offerings if provided
-    if (serviceOfferings && Array.isArray(serviceOfferings)) {
+    if (serviceOfferingIds && Array.isArray(serviceOfferingIds)) {
       // Remove existing offerings
       if (specialist.serviceOfferings && specialist.serviceOfferings.length > 0) {
         await serviceOfferingRepository.remove(specialist.serviceOfferings as any);
       }
 
       // Add new offerings
-      for (const offering of serviceOfferings) {
-        const offeringName = offering.name || offering.title;
-        if (offeringName) {
-          const serviceOffering = serviceOfferingRepository.create({
-            name: offeringName,
-            price: parseFloat(String(offering.price)) || 0,
-            specialist: { id },
-          } as Partial<IServiceOffering>);
-          await serviceOfferingRepository.save(serviceOffering);
-        }
+      for (const masterListId of serviceOfferingIds) {
+        const serviceOffering = serviceOfferingRepository.create({
+          specialists: id,
+          service_offerings_master_list_id: masterListId,
+        } as Partial<IServiceOffering>);
+        await serviceOfferingRepository.save(serviceOffering);
       }
     }
 
     // Fetch updated specialist with relations
     const updatedSpecialist = await specialistRepository.findOne({
       where: { id },
-      relations: ['user', 'serviceOfferings', 'media'],
+      relations: ['serviceOfferings', 'serviceOfferings.masterService', 'media'],
     });
 
     res.status(200).json({
@@ -760,7 +334,7 @@ export const updateSpecialist = async (
   }
 };
 
-// @desc    Publish a specialist (Admin approves - set is_draft = false, verification = approved)
+// @desc    Publish a specialist (Admin only)
 // @route   PATCH /api/specialists/:id/publish
 // @access  Private (Admin only)
 export const publishSpecialist = async (
@@ -784,7 +358,6 @@ export const publishSpecialist = async (
       return;
     }
 
-    // Publish and approve
     specialist.is_draft = false;
     specialist.verification_status = 'approved';
     specialist.is_verified = true;
@@ -792,7 +365,7 @@ export const publishSpecialist = async (
 
     res.status(200).json({
       success: true,
-      message: 'Specialist published and approved successfully',
+      message: 'Specialist published successfully',
       data: specialist,
     });
   } catch (error) {
@@ -800,7 +373,7 @@ export const publishSpecialist = async (
   }
 };
 
-// @desc    Unpublish a specialist (set is_draft = true)
+// @desc    Unpublish a specialist (Admin only)
 // @route   PATCH /api/specialists/:id/unpublish
 // @access  Private (Admin only)
 export const unpublishSpecialist = async (
@@ -824,7 +397,6 @@ export const unpublishSpecialist = async (
       return;
     }
 
-    // Unpublish
     specialist.is_draft = true;
     await specialistRepository.save(specialist);
 
@@ -838,7 +410,7 @@ export const unpublishSpecialist = async (
   }
 };
 
-// @desc    Delete a specialist (soft delete)
+// @desc    Delete a specialist (soft delete - Admin only)
 // @route   DELETE /api/specialists/:id
 // @access  Private (Admin only)
 export const deleteSpecialist = async (
@@ -862,7 +434,6 @@ export const deleteSpecialist = async (
       return;
     }
 
-    // Soft delete - TypeORM will set deleted_at automatically
     await specialistRepository.softRemove(specialist);
 
     res.status(200).json({
@@ -874,42 +445,7 @@ export const deleteSpecialist = async (
   }
 };
 
-// @desc    Delete a service offering (Admin)
-// @route   DELETE /api/specialists/:id/service-offerings/:offeringId
-// @access  Private (Admin only)
-export const deleteServiceOffering = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const { offeringId } = req.params;
-    const serviceOfferingRepository = getServiceOfferingRepository();
-
-    const offering = await serviceOfferingRepository.findOne({
-      where: { id: offeringId },
-    });
-
-    if (!offering) {
-      res.status(404).json({
-        success: false,
-        message: 'Service offering not found',
-      });
-      return;
-    }
-
-    await serviceOfferingRepository.remove(offering);
-
-    res.status(200).json({
-      success: true,
-      message: 'Service offering deleted successfully',
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// @desc    Verify/Reject a specialist (change verification status)
+// @desc    Verify/Reject a specialist (Admin only)
 // @route   PATCH /api/specialists/:id/verify
 // @access  Private (Admin only)
 export const verifySpecialist = async (
@@ -921,7 +457,6 @@ export const verifySpecialist = async (
     const { id } = req.params;
     const { verification_status } = req.body as { verification_status?: VerificationStatus };
 
-    // Validate verification status
     const validStatuses: VerificationStatus[] = ['pending', 'approved', 'under_review', 'rejected'];
     if (!verification_status || !validStatuses.includes(verification_status)) {
       res.status(400).json({
@@ -945,11 +480,9 @@ export const verifySpecialist = async (
       return;
     }
 
-    // Update verification status
     specialist.verification_status = verification_status;
     specialist.is_verified = verification_status === 'approved';
     
-    // If approved, also publish
     if (verification_status === 'approved') {
       specialist.is_draft = false;
     }
@@ -966,8 +499,153 @@ export const verifySpecialist = async (
   }
 };
 
+// ==================== MASTER LIST CRUD (Admin only) ====================
+
+// @desc    Get all master services
+// @route   GET /api/specialists/master-services
+// @access  Public
+export const getMasterServices = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const masterListRepository = getMasterListRepository();
+    const services = await masterListRepository.find({
+      order: { title: 'ASC' },
+    });
+
+    res.status(200).json({
+      success: true,
+      data: services,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Create a master service (Admin only)
+// @route   POST /api/specialists/master-services
+// @access  Private (Admin only)
+export const createMasterService = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { title, description, s3_key, bucket_name } = req.body;
+
+    if (!title) {
+      res.status(400).json({
+        success: false,
+        message: 'Title is required',
+      });
+      return;
+    }
+
+    const masterListRepository = getMasterListRepository();
+
+    const service = masterListRepository.create({
+      title,
+      description: description || null,
+      s3_key: s3_key || null,
+      bucket_name: bucket_name || null,
+    } as Partial<IServiceOfferingsMasterList>);
+
+    await masterListRepository.save(service);
+
+    res.status(201).json({
+      success: true,
+      message: 'Master service created successfully',
+      data: service,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update a master service (Admin only)
+// @route   PUT /api/specialists/master-services/:id
+// @access  Private (Admin only)
+export const updateMasterService = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { title, description, s3_key, bucket_name } = req.body;
+
+    const masterListRepository = getMasterListRepository();
+
+    const service = await masterListRepository.findOne({
+      where: { id },
+    }) as IServiceOfferingsMasterList | null;
+
+    if (!service) {
+      res.status(404).json({
+        success: false,
+        message: 'Master service not found',
+      });
+      return;
+    }
+
+    if (title) service.title = title;
+    if (description !== undefined) service.description = description;
+    if (s3_key !== undefined) service.s3_key = s3_key;
+    if (bucket_name !== undefined) service.bucket_name = bucket_name;
+
+    await masterListRepository.save(service);
+
+    res.status(200).json({
+      success: true,
+      message: 'Master service updated successfully',
+      data: service,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Delete a master service (Admin only)
+// @route   DELETE /api/specialists/master-services/:id
+// @access  Private (Admin only)
+export const deleteMasterService = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const masterListRepository = getMasterListRepository();
+
+    const service = await masterListRepository.findOne({
+      where: { id },
+    });
+
+    if (!service) {
+      res.status(404).json({
+        success: false,
+        message: 'Master service not found',
+      });
+      return;
+    }
+
+    await masterListRepository.remove(service);
+
+    res.status(200).json({
+      success: true,
+      message: 'Master service deleted successfully',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ==================== PLATFORM FEE ====================
+
 // @desc    Get all platform fee tiers
-// @route   GET /api/platform-fees
+// @route   GET /api/specialists/platform-fees/all
 // @access  Public
 export const getPlatformFees = async (
   req: AuthRequest,
@@ -989,16 +667,8 @@ export const getPlatformFees = async (
   }
 };
 
-interface SavePlatformFeeBody {
-  id?: string;
-  tier_name?: string;
-  min_value?: number;
-  max_value?: number | null;
-  platform_fee_percentage?: number;
-}
-
-// @desc    Create/Update platform fee tier
-// @route   POST /api/platform-fees
+// @desc    Create/Update platform fee tier (Admin only)
+// @route   POST /api/specialists/platform-fees
 // @access  Private (Admin only)
 export const savePlatformFee = async (
   req: AuthRequest,
@@ -1006,7 +676,7 @@ export const savePlatformFee = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { id, tier_name, min_value, max_value, platform_fee_percentage } = req.body as SavePlatformFeeBody;
+    const { id, tier_name, min_value, max_value, platform_fee_percentage } = req.body;
 
     const platformFeeRepository = getPlatformFeeRepository();
 

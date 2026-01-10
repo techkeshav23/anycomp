@@ -27,6 +27,9 @@ const resetDatabase = async (): Promise<void> => {
     await client.query('DROP TABLE IF EXISTS "service_offerings" CASCADE');
     console.log('   ✓ Dropped service_offerings');
 
+    await client.query('DROP TABLE IF EXISTS "service_offerings_master_list" CASCADE');
+    console.log('   ✓ Dropped service_offerings_master_list');
+
     await client.query('DROP TABLE IF EXISTS "platform_fee" CASCADE');
     console.log('   ✓ Dropped platform_fee');
 

@@ -1,8 +1,10 @@
 import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { AppDataSource } from '../data-source';
-import User from '../entity/User';
-import { AuthRequest, JwtPayload, UserRole, IUser } from '../types';
+import { AuthRequest, JwtPayload } from '../types';
+
+// Admin credentials from .env
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@anycomp.com';
+const ADMIN_NAME = process.env.ADMIN_NAME || 'Admin';
 
 // Protect routes - Verify JWT token (required)
 export const protect = async (
@@ -33,22 +35,21 @@ export const protect = async (
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
 
-    // Get user from database
-    const userRepository = AppDataSource.getRepository(User);
-    const user = await userRepository.findOne({
-      where: { id: decoded.id },
-    }) as IUser | null;
-
-    if (!user) {
+    // Check if token email matches admin email
+    if (decoded.email !== ADMIN_EMAIL) {
       res.status(401).json({
         success: false,
-        message: 'User not found. Token is invalid.',
+        message: 'Invalid token. Not an admin.',
       });
       return;
     }
 
-    // Attach user to request object
-    req.user = user;
+    // Attach admin info to request object
+    req.user = {
+      email: ADMIN_EMAIL,
+      name: ADMIN_NAME,
+      role: 'admin',
+    };
     next();
   } catch (error) {
     // Handle specific JWT errors
@@ -102,24 +103,23 @@ export const optionalAuth = async (
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
 
-    // Get user from database
-    const userRepository = AppDataSource.getRepository(User);
-    const user = await userRepository.findOne({
-      where: { id: decoded.id },
-    }) as IUser | null;
-
-    if (user) {
-      req.user = user;
+    // Check if valid admin token
+    if (decoded.email === ADMIN_EMAIL) {
+      req.user = {
+        email: ADMIN_EMAIL,
+        name: ADMIN_NAME,
+        role: 'admin',
+      };
     }
-  } catch (error) {
+  } catch {
     // Token invalid, but we don't care - this is optional auth
   }
 
   next();
 };
 
-// Authorize by role - Role-based access control
-export const authorize = (...roles: UserRole[]) => {
+// Authorize by role - Role-based access control (only admin exists now)
+export const authorize = (...roles: string[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction): void => {
     if (!req.user) {
       res.status(401).json({
