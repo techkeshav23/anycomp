@@ -51,7 +51,6 @@ export default function ThemeRegistry({ children }: { children: React.ReactNode 
   });
 
   return (
-    // @ts-expect-error: Known issue with Emotion types and React 18
     <CacheProvider value={cache}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
