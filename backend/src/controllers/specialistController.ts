@@ -206,14 +206,16 @@ export const createSpecialist = async (
     const serviceOfferingRepository = getServiceOfferingRepository();
 
     // Calculate pricing
-    const priceData = await calculateFinalPrice(parseFloat(String(base_price)) || 0);
+    const rawPrice = parseFloat(String(base_price));
+    const roundedBasePrice = Math.round((rawPrice + Number.EPSILON) * 100) / 100;
+    const priceData = await calculateFinalPrice(roundedBasePrice || 0);
 
     // Create specialist (no user relation needed)
     const specialist = specialistRepository.create({
       title,
       slug: null,
       description: description || null,
-      base_price: parseFloat(String(base_price)) || 0,
+      base_price: roundedBasePrice || 0,
       platform_fee: priceData.platform_fee,
       final_price: priceData.final_price,
       duration_days: duration_days || 1,
@@ -293,8 +295,12 @@ export const updateSpecialist = async (
 
     // Recalculate price if base_price changed
     if (base_price !== undefined) {
-      const priceData = await calculateFinalPrice(parseFloat(String(base_price)) || 0);
-      specialist.base_price = parseFloat(String(base_price)) || 0;
+      // Ensure specific rounding to avoid floating point precision issues
+      const rawPrice = parseFloat(String(base_price));
+      const roundedBasePrice = Math.round((rawPrice + Number.EPSILON) * 100) / 100;
+      
+      const priceData = await calculateFinalPrice(roundedBasePrice || 0);
+      specialist.base_price = roundedBasePrice || 0;
       specialist.platform_fee = priceData.platform_fee;
       specialist.final_price = priceData.final_price;
     }
