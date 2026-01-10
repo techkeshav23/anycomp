@@ -13,9 +13,14 @@ module.exports = {
         surface: '#f8fafc',
         'navy': '#0b3a74',
         'navy-dark': '#0f172a',
+        // Requirement #7: Font-Color: #222222
+        gray: {
+          900: '#222222', // Overriding default gray-900 to ensure strict compliance
+          ...require('tailwindcss/colors').gray,
+        }
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['var(--font-red-hat-display)', 'Proxima Nova', 'system-ui', '-apple-system', 'sans-serif'],
       },
     },
   },

@@ -20,7 +20,6 @@ interface Specialist {
   service_category?: string;
   supported_company_types?: string[];
   media?: { id: string; file_name: string; display_order: number }[];
-  user?: { name: string };
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -159,17 +158,17 @@ export default function Services() {
 
                       {/* Content */}
                       <div className="p-4">
-                        {/* User Info with Avatar */}
+                        {/* Service Icon with Avatar */}
                         <div className="flex items-start gap-2 mb-3">
-                          <div className="w-9 h-9 rounded-full bg-gray-300 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                            <span className="text-gray-600 text-sm font-medium">
-                              {specialist.user?.name?.charAt(0).toUpperCase() || 'S'}
+                          <div className="w-9 h-9 rounded-full bg-blue-900 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                            <span className="text-white text-sm font-medium">
+                              {specialist.title?.charAt(0).toUpperCase() || 'S'}
                             </span>
                           </div>
                           <div className="min-w-0 pt-0.5">
                             <p className="text-sm leading-snug">
-                              <span className="font-semibold text-gray-900">{specialist.user?.name || 'Specialist'}</span>
-                              <span className="text-gray-500"> - Company Secretary</span>
+                              <span className="font-semibold text-gray-900">Company Secretary</span>
+                              <span className="text-gray-500"> - Professional Service</span>
                             </p>
                           </div>
                         </div>

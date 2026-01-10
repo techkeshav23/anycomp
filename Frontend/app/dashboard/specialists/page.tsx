@@ -54,8 +54,10 @@ export default function SpecialistsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [actionMenuId, setActionMenuId] = useState<string | null>(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
-  const [userRole, setUserRole] = useState<string>('user');
   const [actionLoading, setActionLoading] = useState<string | null>(null); // 'approve' | 'reject' | 'delete' | null
+
+  // Admin only - no role check needed
+  const isAdmin = true;
 
   const handleActionClick = (e: React.MouseEvent, specialistId: string) => {
     e.stopPropagation();
@@ -70,14 +72,6 @@ export default function SpecialistsPage() {
       setActionMenuId(specialistId);
     }
   };
-
-  useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      const user = JSON.parse(userData);
-      setUserRole(user.role);
-    }
-  }, []);
 
   useEffect(() => {
     fetchSpecialists();
@@ -443,7 +437,7 @@ export default function SpecialistsPage() {
                 <Edit className="w-4 h-4" />
                 Edit
               </Link>
-              {userRole === 'admin' && (() => {
+              {isAdmin && (() => {
                 const selectedSpecialist = specialists.find(s => s.id === actionMenuId);
                 const isUnderReview = selectedSpecialist?.verification_status === 'under_review';
                 return (

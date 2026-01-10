@@ -16,14 +16,8 @@ export default function DashboardPage() {
     }
 
     try {
-      const user = JSON.parse(userData);
-      
-      // Redirect based on role
-      if (user.role === 'admin') {
-        router.push('/dashboard/specialists'); // Admin sees all specialists
-      } else {
-        router.push('/dashboard/services'); // Specialist sees their ONE service
-      }
+      // Admin only - redirect to specialists
+      router.push('/dashboard/specialists');
     } catch {
       router.push('/signin');
     } finally {

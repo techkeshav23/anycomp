@@ -187,10 +187,7 @@ export default function SignIn() {
               {loading ? 'Logging in...' : 'Log In'}
             </button>
 
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-2 mt-2 text-sm">
-              <p className="text-slate-500">
-                No account? <Link href="/signup" className="text-navy font-medium no-underline hover:underline">Register here</Link>
-              </p>
+            <div className="flex items-center justify-center mt-2 text-sm">
               <Link href="#" className="text-navy font-medium no-underline hover:underline">Reset Password</Link>
             </div>
           </form>

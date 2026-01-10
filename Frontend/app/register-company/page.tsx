@@ -19,7 +19,6 @@ interface Specialist {
   is_verified: boolean;
   service_category?: string;
   media?: { id: string; file_name: string; display_order: number }[];
-  user?: { name: string };
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -166,11 +165,6 @@ export default function RegisterCompany() {
                           <h3 className="text-lg font-semibold text-gray-900 mb-1 group-hover:text-[#1e3a5f] transition">
                             {specialist.title}
                           </h3>
-                          {specialist.user && (
-                            <p className="text-sm text-gray-500 mb-2">
-                              by {specialist.user.name}
-                            </p>
-                          )}
                           <p className="text-sm text-gray-600 line-clamp-2 mb-3">
                             {specialist.description || 'Professional company registration services'}
                           </p>

@@ -21,10 +21,9 @@ import {
 } from 'lucide-react';
 
 interface User {
-  id: number;
   name: string;
   email: string;
-  role: string;
+  role: 'admin';
 }
 
 // Admin sidebar - full access to manage specialists and platform
@@ -32,16 +31,6 @@ const adminSidebarItems = [
   { name: 'Specialists', href: '/dashboard/specialists', icon: Users },
   { name: 'Clients', href: '/dashboard/clients', icon: Users },
   { name: 'Service Orders', href: '/dashboard/orders', icon: ShoppingCart },
-  { name: 'eSignature', href: '/dashboard/esignature', icon: FileSignature },
-  { name: 'Messages', href: '/dashboard/messages', icon: Mail },
-  { name: 'Invoices & Receipts', href: '/dashboard/invoices', icon: Receipt },
-];
-
-// Specialist sidebar - manage their own service (ONE service only)
-const specialistSidebarItems = [
-  { name: 'Services', href: '/dashboard/services', icon: Users },
-  { name: 'Clients', href: '/dashboard/clients', icon: Users },
-  { name: 'Orders', href: '/dashboard/orders', icon: ShoppingCart },
   { name: 'eSignature', href: '/dashboard/esignature', icon: FileSignature },
   { name: 'Messages', href: '/dashboard/messages', icon: Mail },
   { name: 'Invoices & Receipts', href: '/dashboard/invoices', icon: Receipt },
@@ -96,7 +85,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-white flex">
       {/* Mobile Overlay */}
       {sidebarOpen && (
         <div 
@@ -120,11 +109,11 @@ export default function DashboardLayout({
           </div>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-blue-900 flex items-center justify-center text-white font-semibold">
-              {user?.name?.charAt(0) || 'U'}
+              {user?.name?.charAt(0) || 'A'}
             </div>
             <div>
-              <div className="font-medium text-gray-900">{user?.name || 'User'}</div>
-              <div className="text-xs text-blue-600">{user?.role || 'user'}</div>
+              <div className="font-medium text-gray-900">{user?.name || 'Admin'}</div>
+              <div className="text-xs text-blue-600">Admin</div>
             </div>
           </div>
         </div>
@@ -132,10 +121,10 @@ export default function DashboardLayout({
         {/* Navigation */}
         <nav className="flex-1 p-4">
           <div className="text-xs text-gray-400 uppercase tracking-wider mb-4">
-            {user?.role === 'admin' ? 'Admin Dashboard' : 'My Dashboard'}
+            Admin Dashboard
           </div>
           <ul className="space-y-1">
-            {(user?.role === 'admin' ? adminSidebarItems : specialistSidebarItems).map((item) => {
+            {adminSidebarItems.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
               return (
                 <li key={item.name}>
@@ -188,6 +177,7 @@ export default function DashboardLayout({
       {/* Main Content */}
       <main className="flex-1 lg:ml-64">
         {/* Top Header */}
+        {!pathname?.match(/^\/dashboard\/specialists\/[^/]+$/) && (
         <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10">
           <div className="flex items-center gap-4 flex-1">
             {/* Mobile Menu Button */}
@@ -221,6 +211,7 @@ export default function DashboardLayout({
             </div>
           </div>
         </header>
+        )}
 
         {/* Page Content */}
         <div className="p-4 sm:p-6">{children}</div>

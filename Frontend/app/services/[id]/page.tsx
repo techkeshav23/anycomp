@@ -29,7 +29,6 @@ interface Specialist {
     price: number;
   }[];
   media?: { id: string; file_name: string; display_order: number }[];
-  user?: { id: string; name: string; email: string };
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -285,24 +284,6 @@ export default function SpecialistDetail() {
                           <span className="text-sm font-medium text-gray-700">{type}</span>
                         </div>
                       ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Provider Info */}
-                {specialist.user && (
-                  <div className="pt-6 border-t border-gray-100">
-                    <h2 className="text-lg font-semibold text-gray-900 mb-3">About the provider</h2>
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                        <span className="text-xl font-bold text-white">
-                          {specialist.user.name.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-900">{specialist.user.name}</h3>
-                        <p className="text-sm text-gray-500">Company Secretary</p>
-                      </div>
                     </div>
                   </div>
                 )}

@@ -20,7 +20,7 @@ const Navbar = () => {
 
           {/* Navigation Links - Desktop */}
           <div className="hidden lg:flex flex-1 justify-center space-x-10 items-center">
-            <Link href="/services?category=incorporation" className="text-[13px] font-medium text-gray-700 hover:text-navy transition-all duration-200 whitespace-nowrap relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-navy after:transition-all after:duration-200 hover:after:w-full">
+            <Link href="/services" className="text-[13px] font-medium text-gray-700 hover:text-navy transition-all duration-200 whitespace-nowrap relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-navy after:transition-all after:duration-200 hover:after:w-full">
               Register Your Company
             </Link>
             <Link href="/appoint-secretary" className="text-[13px] font-medium text-gray-700 hover:text-navy transition-all duration-200 whitespace-nowrap relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-navy after:transition-all after:duration-200 hover:after:w-full">
@@ -54,7 +54,7 @@ const Navbar = () => {
                 Login
               </Link>
               <Link
-                href="/signup"
+                href="#"
                 className="bg-navy text-white px-5 py-2 rounded-md text-sm font-semibold hover:bg-opacity-90 transition-colors"
               >
                 Sign Up

@@ -39,7 +39,7 @@ export default function SettingsPage() {
     email: '',
     phone: '',
     company: '',
-    role: 'user',
+    role: 'admin',
   });
 
   const [notifications, setNotifications] = useState<NotificationSettings>({
@@ -65,7 +65,7 @@ export default function SettingsPage() {
         email: user.email || '',
         phone: user.phone || '',
         company: '',
-        role: user.role || 'user',
+        role: 'admin', // Always admin
       });
     }
   }, []);

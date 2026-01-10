@@ -5,11 +5,11 @@ import { useRouter } from 'next/navigation';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
+// Admin user (no id - from .env, not DB)
 interface User {
-  id: string;
   name: string;
   email: string;
-  role: 'admin' | 'user' | 'secretary';
+  role: 'admin';
 }
 
 interface AuthContextType {
@@ -127,8 +127,8 @@ export function useAuth() {
   return context;
 }
 
-// Custom hook for protected routes
-export function useRequireAuth(allowedRoles?: ('admin' | 'user' | 'secretary')[]) {
+// Custom hook for protected routes (only admin allowed)
+export function useRequireAuth() {
   const { user, loading, isAuthenticated } = useAuth();
   const router = useRouter();
 
@@ -136,13 +136,7 @@ export function useRequireAuth(allowedRoles?: ('admin' | 'user' | 'secretary')[]
     if (!loading && !isAuthenticated) {
       router.push('/signin');
     }
-
-    if (!loading && isAuthenticated && allowedRoles && user) {
-      if (!allowedRoles.includes(user.role)) {
-        router.push('/dashboard'); // Redirect to dashboard if not authorized
-      }
-    }
-  }, [loading, isAuthenticated, user, allowedRoles, router]);
+  }, [loading, isAuthenticated, router]);
 
   return { user, loading, isAuthenticated };
 }
