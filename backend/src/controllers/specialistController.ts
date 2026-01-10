@@ -22,10 +22,12 @@ const generateSlug = (title: string, id: string): string => {
 const calculateFinalPrice = async (basePrice: number): Promise<PriceCalculation> => {
   const platformFeeRepository = getPlatformFeeRepository();
   
+  // Cast DB columns to DECIMAL to allow comparison with float basePrice
+  // This prevents "invalid input syntax for type integer" if basePrice has decimals
   const feeTier = await platformFeeRepository
     .createQueryBuilder('pf')
-    .where('pf.min_value <= :price', { price: basePrice })
-    .andWhere('(pf.max_value >= :price OR pf.max_value IS NULL)', { price: basePrice })
+    .where('CAST(pf.min_value AS DECIMAL) <= :price', { price: basePrice })
+    .andWhere('(CAST(pf.max_value AS DECIMAL) >= :price OR pf.max_value IS NULL)', { price: basePrice })
     .getOne() as IPlatformFee | null;
 
   if (feeTier) {
@@ -291,7 +293,11 @@ export const updateSpecialist = async (
       specialist.slug = generateSlug(title, specialist.id);
     }
     if (description !== undefined) specialist.description = description;
-    if (duration_days) specialist.duration_days = duration_days;
+    
+    // Ensure duration_days is an integer to avoid DB type errors
+    if (duration_days !== undefined) {
+      specialist.duration_days = parseInt(String(duration_days), 10) || 1;
+    }
 
     // Recalculate price if base_price changed
     if (base_price !== undefined) {
