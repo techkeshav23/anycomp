@@ -6,10 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
   Users,
-  ShoppingCart,
-  FileSignature,
   Mail,
-  Receipt,
   HelpCircle,
   Settings,
   LogOut,
@@ -18,6 +15,10 @@ import {
   Search,
   Menu,
   X,
+  Tag,
+  ClipboardList,
+  PenTool,
+  FileText,
 } from 'lucide-react';
 
 interface User {
@@ -28,12 +29,12 @@ interface User {
 
 // Admin sidebar - full access to manage specialists and platform
 const adminSidebarItems = [
-  { name: 'Specialists', href: '/dashboard/specialists', icon: Users },
+  { name: 'Specialists', href: '/dashboard/specialists', icon: Tag },
   { name: 'Clients', href: '/dashboard/clients', icon: Users },
-  { name: 'Service Orders', href: '/dashboard/orders', icon: ShoppingCart },
-  { name: 'eSignature', href: '/dashboard/esignature', icon: FileSignature },
+  { name: 'Service Orders', href: '/dashboard/orders', icon: ClipboardList },
+  { name: 'eSignature', href: '/dashboard/esignature', icon: PenTool },
   { name: 'Messages', href: '/dashboard/messages', icon: Mail },
-  { name: 'Invoices & Receipts', href: '/dashboard/invoices', icon: Receipt },
+  { name: 'Invoices & Receipts', href: '/dashboard/invoices', icon: FileText },
 ];
 
 const bottomItems = [

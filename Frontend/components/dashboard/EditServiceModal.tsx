@@ -1,7 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { X, Upload, Loader2, Image as ImageIcon, Check } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { 
+  X, Upload, Loader2, Image as ImageIcon, Check,
+  UserPlus, Landmark, FileText, Zap, MapPin, Calendar, 
+  Award, Truck, Headphones, Search, ChevronDown
+} from 'lucide-react';
 
 interface ServiceOffering {
   id?: string;
@@ -80,6 +84,18 @@ const AVAILABLE_OFFERINGS = [
   { title: 'Chat Support', description: 'Dedicated live chat support for compliance, filing, and technical assistance', price: 0 },
 ];
 
+const OFFERING_ICONS: { [key: string]: any } = {
+  'Company Secretary Subscription': UserPlus,
+  'Opening of a Bank Account': Landmark,
+  'Access Company Records and SSM Forms': FileText,
+  'Priority Filing': Zap,
+  'Registered Office Address Use': MapPin,
+  'Compliance Calendar Setup': Calendar,
+  'First Share Certificate Issued Free': Award,
+  'CTC Delivery & Courier Handling': Truck,
+  'Chat Support': Headphones,
+};
+
 export default function EditServiceModal({ specialist, onClose, onSave }: EditServiceModalProps) {
   const [formData, setFormData] = useState({
     title: specialist.title || '',
@@ -108,6 +124,23 @@ export default function EditServiceModal({ specialist, onClose, onSave }: EditSe
   
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // Upload image handler
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -395,43 +428,89 @@ export default function EditServiceModal({ specialist, onClose, onSave }: EditSe
           </div>
 
           {/* Additional Offerings */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="space-y-3">
+            <label className="block text-lg font-semibold text-gray-900">
               Additional Offerings
             </label>
-            <p className="text-xs text-gray-500 mb-3">Select the add-ons you want to offer</p>
-            <div className="space-y-2 max-h-60 overflow-y-auto border border-gray-200 rounded-lg p-3">
-              {AVAILABLE_OFFERINGS.map((offering, index) => (
-                <div
-                  key={index}
-                  onClick={() => toggleOffering(offering.title)}
-                  className={`flex items-start gap-3 p-3 rounded-lg cursor-pointer transition ${
-                    selectedOfferings.includes(offering.title)
-                      ? 'bg-blue-50 border border-blue-200'
-                      : 'bg-gray-50 border border-transparent hover:bg-gray-100'
-                  }`}
-                >
-                  <div className={`w-5 h-5 rounded border flex-shrink-0 flex items-center justify-center mt-0.5 ${
-                    selectedOfferings.includes(offering.title)
-                      ? 'bg-blue-600 border-blue-600'
-                      : 'border-gray-300 bg-white'
-                  }`}>
-                    {selectedOfferings.includes(offering.title) && (
-                      <Check className="w-3 h-3 text-white" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm font-medium text-gray-900">{offering.title}</p>
-                      {offering.price > 0 && (
-                        <span className="text-xs font-medium text-blue-600">+RM {offering.price}</span>
-                      )}
-                    </div>
-                    <p className="text-xs text-gray-500 mt-0.5">{offering.description}</p>
-                  </div>
+            
+            <div ref={dropdownRef} className="relative">
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setIsDropdownOpen(true);
+                  }}
+                  onFocus={() => setIsDropdownOpen(true)}
+                  placeholder="Select Service Offerings"
+                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm shadow-sm"
+                />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                  {isDropdownOpen ? <Search className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </div>
-              ))}
+              </div>
+
+              {isDropdownOpen && (
+                <div className="absolute z-20 w-full mt-1 bg-white border border-gray-100 rounded-lg shadow-xl max-h-[300px] overflow-y-auto">
+                  {AVAILABLE_OFFERINGS
+                    .filter(offering => 
+                      offering.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+                      !selectedOfferings.includes(offering.title)
+                    )
+                    .map((offering, index) => {
+                      const Icon = OFFERING_ICONS[offering.title] || Check;
+                      return (
+                        <div
+                          key={index}
+                          onClick={() => {
+                            toggleOffering(offering.title);
+                            setSearchTerm('');
+                            setIsDropdownOpen(false);
+                          }}
+                          className="flex items-start gap-4 p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-none transition-colors group"
+                        >
+                          <div className="mt-1 text-gray-400 group-hover:text-gray-600">
+                            <Icon className="w-5 h-5" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-sm font-semibold text-gray-900 mb-0.5">{offering.title}</h4>
+                            <p className="text-xs text-gray-500">{offering.description}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {AVAILABLE_OFFERINGS.every(o => selectedOfferings.includes(o.title) || !o.title.toLowerCase().includes(searchTerm.toLowerCase())) && (
+                      <div className="p-8 text-center text-gray-500 text-sm">
+                        <p>No matching offerings found</p>
+                      </div>
+                    )}
+                </div>
+              )}
             </div>
+
+            {/* Selected Offerings Chips - Matching Image 2 Style */}
+            {selectedOfferings.length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {selectedOfferings.map((title) => (
+                  <div
+                    key={title}
+                    className="flex items-center gap-2 pl-3 pr-2 py-1.5 bg-gray-100/80 hover:bg-gray-100 rounded-md text-sm text-gray-800 border border-transparent transition-colors"
+                  >
+                    <span>{title}</span>
+                    <button
+                      type="button"
+                      onClick={() => toggleOffering(title)}
+                      className="p-0.5 rounded-full hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition-colors"
+                    >
+                      <div className="bg-gray-500 text-white rounded-full p-0.5">
+                        <X className="w-2.5 h-2.5" />
+                      </div>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Service Images */}
